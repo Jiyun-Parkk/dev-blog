@@ -10,9 +10,9 @@ const siteMetadata = {
   theme: 'system', // system, dark or light
   siteUrl: 'https://june-dev.vercel.app/',
   siteRepo: 'https://github.com/timlrx/tailwind-nextjs-starter-blog',
-  siteLogo: '/static/images/logo.png',
-  image: '/static/images/avatar.png',
-  socialBanner: '/static/images/twitter-card.png',
+  siteLogo: 'logoDark.png',
+  image: '/static/images/profile.png',
+  socialBanner: '/static/images/thumb.jpeg',
   email: 'jiyun1937@naver.com',
   github: 'https://github.com/jiyun-par',
   twitter: 'https://twitter.com/Twitter',

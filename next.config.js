@@ -73,17 +73,13 @@ module.exports = () => {
         },
       ]
     },
-    webpack: (config, { dev, isServer }) => {
-      ;(config.resolve.alias = {
-        ...config.resolve.alias,
-        // fixes next-mdx-remote: Package path ./jsx-runtime.js is not exported from package react
-        // https://github.com/hashicorp/next-mdx-remote/issues/237
-        'react/jsx-runtime.js': require.resolve('react/jsx-runtime'),
-      }),
-        config.module.rules.push({
-          test: /\.svg$/,
-          use: ['@svgr/webpack'],
-        })
+    webpack: (config, options) => {
+      config.module.rules.push({
+        test: /\.svg$/,
+        use: ['@svgr/webpack'],
+      })
+
+      return config
     },
   })
 }

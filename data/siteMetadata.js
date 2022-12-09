@@ -4,7 +4,7 @@
 const siteMetadata = {
   title: `Jiyun's Dev Blog`,
   author: 'Jiyun Park',
-  headerTitle: 'Dev June',
+  headerTitle: 'Dev Blog',
   description: '느려도 꾸준하게',
   language: 'ko',
   theme: 'system', // system, dark or light
@@ -13,7 +13,7 @@ const siteMetadata = {
   siteLogo: '/static/images/logo.png',
   image: '/static/images/avatar.png',
   socialBanner: '/static/images/twitter-card.png',
-  email: 'address@yoursite.com',
+  email: 'jiyun1937@naver.com',
   github: 'https://github.com/jiyun-par',
   twitter: 'https://twitter.com/Twitter',
   facebook: 'https://facebook.com',

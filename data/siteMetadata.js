@@ -24,7 +24,7 @@ const siteMetadata = {
     // If you want to use an analytics provider you have to add it to the
     // content security policy in the `next.config.js` file.
     // supports plausible, simpleAnalytics, umami or googleAnalytics
-    plausibleDataDomain: 'https://june-dev.vercel.app/', // e.g. tailwind-nextjs-starter-blog.vercel.app
+    plausibleDataDomain: '', // e.g. tailwind-nextjs-starter-blog.vercel.app
     simpleAnalytics: false, // true or false
     umamiWebsiteId: '', // e.g. 123e4567-e89b-12d3-a456-426614174000
     posthogProjectApiKey: '', // e.g. AhnJK8392ndPOav87as450xd

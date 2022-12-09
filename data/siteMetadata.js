@@ -6,7 +6,7 @@ const siteMetadata = {
   author: 'Jiyun Park',
   headerTitle: 'Dev Blog',
   description: '느려도 꾸준하게',
-  language: 'ko',
+  language: 'en',
   theme: 'system', // system, dark or light
   siteUrl: 'https://june-dev.vercel.app/',
   siteRepo: 'https://github.com/timlrx/tailwind-nextjs-starter-blog',

@@ -18,7 +18,7 @@ interface LayoutProps {
 }
 
 export default function PostLayout({ content, next, prev, children }: LayoutProps) {
-  const [loadComments, setLoadComments] = useState(false)
+  const [loadComments, setLoadComments] = useState(true)
 
   const { path, slug, date, title } = content
 

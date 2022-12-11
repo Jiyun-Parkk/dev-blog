@@ -1,0 +1,127 @@
+---
+title: Javscript 이베트 버블링 & 캡처링
+date: '2022-12-11'
+tags: ['javscript']
+draft: false
+---
+
+## 1. Event Bubbling
+
+이벤트 버블링은 이벤트가 발생했을 때 해당 이벤트가 상위 요소들로 전달되는 특성을 말한다. 다시 말해서, 하위 요소를 클릭 했지만 상위 요소들에 등록된 이벤트들까지 모두 실행이 되는 것이다.
+
+### Event Bubbling이 되는 이유
+
+Event Bubbling이 되는 이유는 브라우저가 이벤트를 감지 하는 방식 때문이다. 브라우저는 document객체를 만날때까지 가장 최상위 요소의 이벤트 핸들러를 모두 동작시킨다.
+
+### bubbling 예시
+
+아래코드에서 `h1`태그를 클릭하면 `h1`=>`div`=>`body`=>`html` 순으로 bubbling이 일어난다.
+
+```html
+<div>
+  <h1>제목</h1>
+</div>
+
+<script>
+  document.querySelector('div').addEventListener('click', () => {
+    console.log('bubble!')
+  })
+  document.querySelector('h1').addEventListener('click', () => {
+    console.log('target!')
+  })
+</script>
+```
+
+## 2. Event Capturing
+
+Capturing은 Bubbling과 반대로 상위요소에서 하위요소로 이벤트가 전파되는 것을 뜻한다. Capturing은 최상위 조상에서 시작해 아래로 전파가 되고, 이벤트가 타깃 요소에 도착해서 실행된 후에 다시 위로 전파되며 Bubbling이 일어나게 된다.
+
+### Capturing 설정
+
+capturing을 활용해야 하는 경우는 흔지 않은데, 그렇기 때문에 기본적으로 `capture 옵션`은 false로 되어 있다. `capture 옵션?` 아마 익숙하지 않을 것이다. capture 옵션은 우리가 흔히 사용 하는 `addEventListenter` API의 옵션이다.
+
+#### 참고
+
+> [addEventListener MDN](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener)
+
+이 capture 옵션을 `true`로 세팅해주면 해당 이벤트 핸들러는 캡쳐링 단계에서 동작을 하게 된다.
+
+### capturing 예시
+
+아래와 같이 상위요소인 `div`의 이벤트 핸들러에 capture 옵션을 true로 하면 `html`=>`body`=>`div`=>`h1` 순으로 이벤트 전파가 된다.
+
+```html
+<div style="background-color: yellow; padding: 10px">
+  <h1 style="background-color: red">제목</h1>
+</div>
+
+<script>
+  document.querySelector('div').addEventListener(
+    'click',
+    () => {
+      console.log('bubble!')
+    },
+    true
+  )
+  document.querySelector('h1').addEventListener('click', () => {
+    console.log('target!')
+  })
+</script>
+```
+
+## 3. 이벤트 전파 방지하기 - event.stopPropagation()
+
+버블링은 최종적으로 `document`객체를 만날때까지 모든 노드에서 발생하게 된다. 이렇게 되면 실행을 원치 않은 이벤트까지 모두 실행 될 수 있기 때문에, 원하는 위치에서 이벤트 전파를 멈추는 것이 필요하다. 이때 사용 하는 것이 `event.stopPropagation()`이다.
+
+```html
+<div onClick="alert('버블링 그만!')">
+  <h1 onClick="(evnet) => event.stopPropagation()">제목</h1>
+</div>
+```
+
+위의 코드를 동작해보면 `div`에 등록한 이벤트는 실행되지 않는 것을 확인 할 수 있다.
+
+> 하지만 대부분 버블링을 멈춰야 하는 경우는 거의 없다고 한다. 만약에 stopPropagation을 사용하려면 상황에 맞게 신중하게 고려 해야 한다.
+
+## 4. event.target & event.currentTarget
+
+위와 같은 특성 때문에, 정확히 이벤트가 일어나고 있는 타깃이 무엇인지 확인 해야 할 때가 있다. 그럴 때 사용 하는 것이 `event.target`, `event.currentTarget` 이다.
+
+#### event.target
+
+event.target은 실제 이벤트가 시작된 요소를 가리킨다. 요소의 최상위 부모에 클릭 이벤트를 등록하고 event.target을 콘솔에 찍어보면, 클릭한 영역에 자식요소가 있으면 해당 하는 자식 요소가 나타나는 것을 볼 수 있다.
+
+#### event.currentTarget
+
+event.curreuntTarget은 실제로 실행중인 이벤트 핸들러가 할당된 요소를 가르킨다. 여기서 event.currentTarget이 등록한 이벤트에서 가르키는 `this`가 된다.
+
+예를 들어서, `h1`태그와, 이를 감싸고 있는 `div`가 있다고 해보자.
+
+```html
+<div id="title">
+  <h1>제목</h1>
+</div>
+```
+
+여기서 부모요소인 `div`에 클릭 이벤트를 등록하고, 실제 클릭은 `h1`요소를 클릭한다.
+
+```javascript
+const titleBox = document.querySelector('#title')
+
+titleBox.addEventListener('click', (event) => {
+  console.log(event.target, event.currentTarget)
+  // (실제클릭한요소)h1, (실행된 이베트가 등록된 요소)div
+})
+```
+
+위와 같이 콘솔을 확인 해보면 `event.target`은 실제로 클릭한 요소인 `h1`, `event.currentTarget`은 실행되고 있는 이벤트가 등록되어 있는 `div`가 찍히는 것을 확인 할 수 있다.
+
+[참고: 이벤트 버블링 MDN](https://developer.mozilla.org/en-US/docs/Web/API/Event/bubbles)
+
+[참고: 이벤트 캡쳐 MDN](https://developer.mozilla.org/ko/docs/Web/API/EventTarget/addEventListener)
+
+[참고: 이벤트버블링 & 캡쳐링1](https://joshua1988.github.io/web-development/javascript/event-propagation-delegation/)
+
+[참고: 이벤트버블링 & 캡쳐링2](http://daplus.net/javascript-addeventlistener%EC%97%90%EC%84%9C-usecapture-%EB%A7%A4%EA%B0%9C-%EB%B3%80%EC%88%98%EB%A5%BC-%EC%9D%B4%ED%95%B4%ED%95%A0-%EC%88%98-%EC%97%86%EC%8A%B5%EB%8B%88%EB%8B%A4/)
+
+[참고: 이벤트버블링 & 캡쳐링3](https://ko.javascript.info/bubbling-and-capturing)

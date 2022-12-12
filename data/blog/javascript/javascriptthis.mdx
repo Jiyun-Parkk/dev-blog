@@ -1,0 +1,94 @@
+---
+title: Javscript에서 This
+date: '2022-12-12'
+tags: ['javscript']
+draft: false
+---
+
+## this가 가르키는 것
+
+### 1. this의 기본값
+
+`this`는 기본적으로 window 객체를 가르킨다. 하지만 script 최상단에 `use strict`를 쓰면 this는 `undefined`다.
+
+### 2. 이벤트 실행시 실행되는 함수 내부의 this
+
+아래 예시에서는 함수를 실행시키기 위해서 발생된 이벤트가 등록된 요소가 this가 된다.
+실제로 이벤트를 실행하고 있는 요소를 가르키는
+`event.currentTarget`과 동일하다.
+
+```javascript
+document.querySelector('.close-btn').addEventListener('click', function () {
+  console.log(this)
+})
+// <button class="close-btn">close</button>
+```
+
+하지만 위 예시는 일반함수일 경우에만 해당한다. es6이후부터 추가된 `=>`화살표 함수를 쓰면 바로 상위의 this를 가르킨다.
+따라서 아래 예시에서 this는, click 이벤트 바로 상위의 this가 window 이므로 window 객체를 가르키게 된다.
+
+```javascript
+document.querySelector('.close-btn').addEventListener('click', () => {
+  console.log(this)
+})
+// window 객체
+```
+
+### 3. 객체 안에 있는 함수 내부의 this
+
+객체 내부에 있는 메소드는 해당 메소드를 가지고 있는 객체를 this로 가르킨다.
+
+```javascript
+const obj = {
+  name: 'kim',
+  fn: function () {
+    console.log(this)
+  },
+}
+
+obj.fn() // {name:'kim',fn:f}
+```
+
+여기서도 마찬가지로 메소드를 화살표 함수로 쓰면, 객체의 바로 상위 this인 window 객체가 된다.
+
+```javascript
+const obj = {
+  name: 'kim',
+  fn: () => {
+    console.log(this)
+  },
+}
+
+obj.fn() // window 객체
+```
+
+### 4. 콜백 함수에서의 this
+
+아래 예시에서 보면 두가지 this가 있다.
+
+1. 첫번째 this: 이 this는 `h1`태그가 등록한 이벤트의 콜백함수 내부에 있고, 해당 함수는 일반함수로 작성되었기 떄문에 이벤트 실행 주체가 this가 된다.
+2. 두번째 this: 이 this는 일반 함수 내부에 작성되어 있고, 실행 자체도 전역 일반함수로 동작한다. 따라서 window 객체를 가르키게 된다.
+
+```javascript
+document.querySelector('h1').addEventListener('click', function () {
+  console.log(this) // 이벤트 등록한 h1 태그
+
+  const arr = [1, 2, 3]
+  arr.forEach(function () {
+    console.log(this) // window
+  })
+})
+```
+
+두번쨰 this를 동일하게 이벤트 주체 요소로 가르키고 싶다면 화살표 함수를 사용하면된다. 화살표 함수로 작성하면 해당 함수의 바로 상위 this 값을 가져오게 된다.
+
+```javascript
+document.querySelector('h1').addEventListener('click', function () {
+  console.log(this) // 이벤트 등록한 h1 태그
+
+  const arr = [1, 2, 3]
+  arr.forEach(() => {
+    console.log(this) // 이벤트 등록한 h1 태그
+  })
+})
+```

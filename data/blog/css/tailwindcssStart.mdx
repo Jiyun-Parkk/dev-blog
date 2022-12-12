@@ -1,0 +1,41 @@
+---
+title: React에서 Tailwind CSS setup 하기 1
+date: '2022-12-13'
+tags: ['css', 'tailwind css']
+draft: false
+---
+
+React에서 tailwind css를 사용하기 위해서 아래 패키들을 설치해주었다.
+
+```bash
+npm i -D tailwindcss postcss autoprefixer
+```
+
+그리고 추가로 tailwind css와 post css 초기 config 파일을 생성해 주었다.
+
+```bash
+npx tailwindcss init -p
+```
+
+tailwind.config.js에서 content 부분에 tailwind css를 사용할 path들을 추가해준다.
+
+> 폴더명/폴더뒤모든경로(\*_)/폴더내모든파일(_)
+
+```javascript
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: ['./pages/**/*.{js,jsx,ts,tsx}', './components/**/*.{js,jsx,ts,tsx}'],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+```
+
+global css 파일에 `@tailwind` 기본 디렉티브들을 추가해준다.
+
+```css
+@tailwind base; /* 기본 reset css setup */
+@tailwind components; /* tailwind component */
+@tailwind utilities; /* tailwind classname으로 스타일을 줄때  */
+```

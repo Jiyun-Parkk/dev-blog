@@ -1,0 +1,37 @@
+---
+title: HTML <details> 태그
+date: '2022-12-19'
+tags: ['html']
+draft: false
+---
+
+강의를 듣다가 생소한 html 태그를 만났다.
+
+바로 `<details>` 태그인데, 토글 버튼을 만들어주는 아주 신기한 태그다.
+`<details>`는 내부에 `<summary>`라는 태그를 가지는데, 이 토글 버튼의 제목이다.
+이 제목을 클릭하면 `<details>`내부의 내용들을 보여준다.
+
+만약 `<summary>`를 적지 않으면 시스템 언어에 따라 자동으로 `세부내용`이라는 단어가 default로 노출된다.
+
+```html
+<details>
+  <summary>토글의 타이틀</summary>
+</details>
+```
+
+### 👉 구현 화면
+
+![ezgif com-gif-maker](https://user-images.githubusercontent.com/72537762/208403829-d864df67-e90a-4eb2-ad49-50b2f0ee77c3.gif)
+
+### `<details>` 제어하기
+
+`<details>`의 제목을 클릭해서 요소가 열리면 `open`속성이 추가 된다. 따라서 css나 js에서 `<details>`
+를 제어하려면 `open`속성을 사용하면 된다.
+
+### css 예시
+
+```css
+details:open {
+  background: red;
+}
+```

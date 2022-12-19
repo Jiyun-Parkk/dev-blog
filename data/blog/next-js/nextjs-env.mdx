@@ -1,0 +1,26 @@
+---
+title: Next.js에서 env 파일 사용하기
+date: '2022-12-19'
+tags: ['react', 'nextjs', 'error']
+draft: false
+---
+
+사이드 프로젝트에서 env 파일을 추가하려는데 계속 에러가 났다.
+
+리액트 프로젝트에서 env 파일이 연결이 잘 안된다면 아래 3가지 경우를 생각해 볼 수 있다.
+
+1. env key 오타
+2. env value 오타
+3. `process.env`뒤에 `REACT_APP`을 안붙였을 경우
+
+그런데 안타깝게도 나는 위 경우를 모두 체크했는데도 계속 에러가 났다...
+
+결론적으로 문제 원인은 `Next.js` 프로젝트 였기 때문이다.
+
+`Next.js`프로젝트에서 env 파일을 연결하기 위해서는 `REACT_APP`이 아니라 `NEXT_PUBLIC` 접두사를 추가해주어야 한다.
+
+### 예시
+
+```
+NEXT_PUBLIC_API_KEY = redsfjkldsvklsd
+```

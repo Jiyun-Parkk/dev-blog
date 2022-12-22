@@ -1,0 +1,49 @@
+---
+title: Tailwind CSS class function 사용하기
+date: '2022-12-22'
+tags: ['css', 'tailwind css']
+draft: false
+---
+
+tailwind로 작업하면서 가장 불편하다고 생각한 것은 class 이름이 너무 많아서
+작성하기가 힘들다는 점이다..만약 class 이름을 어떤 조건에 따라서 부여해야 한다면
+작성하는 법이 더 복잡 해질 수 있다.
+
+아래처럼 method라는 변수의 값에 따라 class를 부여해야 하는데 backtick을 사용해도 작성하는게 쉽지가 않다.
+
+```javascript
+<button
+  className={`border-b-2 pb-4 font-medium
+  ${ method === 'phone' ? ' border-b-orange-500 text-orange-400' : 'border-transparent text-gray-500'`}
+  onClick={onPhoneClick}
+>
+  Phone
+</button>
+```
+
+이럴때 따로 함수를 만들어서 class 이름을 준다고 한다. 아래처럼 인자에 `...classnames`라고 적어주면
+무한대의 인자값을 말한다고 한다. 이 인자는 string으로 된 배열값이고, 이 인자값을 받아서
+모두 string으로 합쳐버리는 것이다.
+
+```javascript
+function buttonClass(...classnames: string[]) {
+  return classnames.join(' ')
+}
+```
+
+### 사용결과
+
+```javascript
+<button
+  className={buttonClass(
+    'border-b-2 pb-4 font-medium',
+    method === 'phone' ? ' border-b-orange-500 text-orange-400' : 'border-transparent text-gray-500'
+  )}
+  onClick={onPhoneClick}
+>
+  Phone
+</button>
+```
+
+결과적으로는 처음 예시처럼 달러표시에 괄호같은것들을 안써도 되긴 하지만..난 여전히 tailwind css가 가독성이 떨어지고
+불편하다 ..ㅠㅠ 쉽자고 쓰는 것인데 나는 오히려 복잡한 것 같다.

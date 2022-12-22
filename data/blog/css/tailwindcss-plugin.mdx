@@ -1,0 +1,52 @@
+---
+title: Tailwind CSS plugin 사용하기
+date: '2022-12-22'
+tags: ['css', 'tailwind css']
+draft: false
+---
+
+Tailwind CSS에서 plugin을 활용하면 커스텀하기 어려운 부분들을 쉽게 스타일링 할 수 있다.
+스타일을 직접 커스텀해서 plugin으로 등록할 수도 있지만, 기본적으로 만들어져있는 plugin들이 몇개 있다.
+
+## 사용법
+
+기본 plugin을 사용하기 위해서는 먼저 프로젝트에 install을 따로 해줘야 한다.
+
+```bash
+npm i @tailwindcss/typography
+```
+
+그리고 `tailwind.cofing.js`에 아래처럼 plugin을 추가해준다.
+
+```javaascript
+
+module.exports = {
+  // ...
+  plugins: [
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/line-clamp'),
+    require('@tailwindcss/aspect-ratio'),
+  ]
+}
+```
+
+### 1. typography
+
+typography plugin은 마크다운이나 CMS 데이터베이스와 같은 소스에서 제공되는 콘텐츠 블록을
+스타일링 할 수 있는 플러그인 이다. 예를 들면 typograpy plugin을 설치하고 class로 `prose`를 주면
+내부 자식요소에서 `blockquote` 나 `<pre><code></code></pre>`코드가 마크다운에서 인용, 코드블록을 사용 한 것처럼
+표현 할 수 있다.
+
+### 2. forms
+
+기본 form, input style을 제공해주고 커스터마이징 하기가 쉽다.
+
+### 3. line-clamp
+
+line-clamp는 고정된 줄수로 텍스트를 자르는데 사용 할 수 있다. `line-clamp-{line 수}`를 추가하면
+쉽게 원하는 줄 수 만큼 텍스트를 정렬 할 수 있다.
+
+### 4. aspect-ratio
+
+aspect-ratio는 요소에 고정된 종횡비를 제공한다. `aspect-w-{n}`,`aspect-h-{n}`을 추가하면 고정된 비율로 크기를 지정해준다.

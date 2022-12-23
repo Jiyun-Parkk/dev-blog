@@ -5,7 +5,7 @@ const siteMetadata = {
   title: `Jiyun's Dev Blog`,
   author: 'Jiyun Park',
   headerTitle: 'Dev Blog',
-  description: '느려도 꾸준하게',
+  description: '웹 프론트 개발 블로그 입니다',
   language: 'en',
   theme: 'system', // system, dark or light
   siteUrl: 'https://june-dev.vercel.app/',

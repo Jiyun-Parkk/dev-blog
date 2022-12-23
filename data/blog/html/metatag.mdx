@@ -1,0 +1,201 @@
+---
+title: meta tag는 어떻게 쓰는걸까
+date: '2022-12-23'
+tags: ['meta', 'html', 'seo']
+draft: false
+---
+
+최근에 Next.js로 개발을 하면서 `SEO`최적화에 대한 고민을 하게 되었다.
+당연히 신경 써야 하는 것을 부끄럽게도 너무 신경쓰지 았아서
+이전에 분명 공부했던 meta tag에 대해 다시 정리해야 할 필요성을 느꼈다.
+
+## meta 태그란?
+
+meta 태그는 해당하는 문서의 정보를 정의할 때 사용한다. 문서는 html 문서를 말한다.
+meta 데이터를 통해 제공된 정보는 브라우저나 검색엔진, 다른 웹 서비스에서 이용하게 된다.
+
+## meta 태그의 속성
+
+meta 태그는 세가지 속성이 있다.
+
+| 속성       | 설명                                                                        |
+| ---------- | --------------------------------------------------------------------------- |
+| http-equiv | HTTP 헤더에 정보 또는 값을 제공하는 content 속성 , name 속성 대신 사용 가능 |
+| name       | 페이지 설명, 키워드, 문서작성자, 뷰포트 설정 등을 명시한다                  |
+| content    | http-equiv나 name이 있을경우 해당 속성에 대한 내용을 보여준다               |
+
+만약 `http-equiv`, `name`속성이 둘다 없다면 `content`속성은 사용 할 수 없다.
+
+## meta tag 종류
+
+1. keyword
+   검색 엔진에 의해 검색되는 단어 지정
+
+```html
+<meta name="keywords" content="HTML, CSS, JavaScript" />
+```
+
+2. description
+   검색 결과에 표시되는 문자 지정
+
+```html
+<meta name="Description" content="안녕하세. 웹개발 기술블로그를 운영하고 있어요. 반갑습니다." />
+```
+
+3. robots
+
+- noindex : 검색 결과에 이 페이지를 표시 하지 않는다.
+- nofollow : 이 페이지의 링크를 따라가지 않는다.
+- noarchive : 검색결과에 저장된 페이지 링크를 표시하지 않는다.
+- All(기본값) : 색인 생성이나 게재에 대한 제한이 없다, 기본값이므로 명시적으로 표시해도 효과 없음
+- Non : noindex, nofollow와 같다
+- index : 그 페이지를 수집대상으로 한다.
+- Follow : 그 페이지를 포함해 링크가 걸린 곳을 수집대상으로 한다.
+
+```html
+<meta name="robots" content="noindex, nofollow" />
+```
+
+4. charset 문자 코드의 종류 설정
+
+   charset은 인코딩 방식을 선언하는 것인데, 문자 깨짐 현상 등 심각한 오류가 나타날 수 있기 때문에
+   이를 방지하기 위해 가장 기본이 되는 것이다.
+
+```html
+<meta charset="UTF-8" />
+```
+
+5. date 날짜 제작일
+
+```html
+<meta name="Date" content="2020-06-05T07:45:37+09:00" />
+```
+
+6. subject 홈페이지 주제지정
+
+```html
+<meta http-equiv="Subject" content="기술블로그" />
+```
+
+7. title 제목
+
+```html
+<meta http-equiv="Title" content="HTML5 공부" />
+```
+
+8. author 작성자
+
+```html
+<meta http-equiv="Author" content="june" />
+```
+
+9. publisher 제작사
+
+```html
+<meta http-equiv="publisher" content="june" />
+```
+
+10. copyright 저작권
+
+```html
+<meta http-equiv="Copyright" content="june" />
+```
+
+11. build 제작 년 월일
+
+```html
+<meta http-equiv="Build" content="date" />
+```
+
+12. last-modified 마지막 수정일
+
+```html
+<meta http-equiv="Last-Modified" content="Fri, 05 Jul 2020 19:40:40" />
+```
+
+13. imagetoolbar 이미지 위 호버시 이미지 관련 툴바 제한
+
+```html
+<meta http-equiv="imagetoolbar" content="no" />
+```
+
+14. cache-control / pragma 캐쉬 되지 않도록
+
+```html
+<meta http-equiv="Cache-Control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-chche" />
+```
+
+15. expires 캐시 만료일
+
+```html
+<meta http-equiv="Expires" content="Mon,  08 Sep 2016 10:10:10 GMT" />
+```
+
+16. refresh 새로고침 - 60초마다 새로고침을 한다
+
+```html
+<meta http-equiv="refresh" content="60" />
+```
+
+입력한 주소로 n초 후 이동
+
+```html
+<meta http-equiv="refresh" content="n; url = 주소" />
+```
+
+16. Page-Enter 페이지 진입시 장면 효과 - IE에서만 사용할 수 있다
+
+```html
+<meta http-equiv="Page-Enter" content="revealtrans(Duration=1, Transition=12)" />
+```
+
+- Box out : 네모난 박스가 안쪽에서 바깥쪽으로
+- Circle in : 원이 바깥에서 안쪽으로
+- Circle out : 원이 안쪽에서 바깥쪽으로
+- Wipe up : 이미지의 아래에서 위쪽으로 수직 이동
+- Wipe down : 이미지의 위에서 아래쪽으로 수직 이동
+- Wipe right : 이미지의 왼쪽에서 오른쪽으로 수평 이동
+- Wipe left : 이미지의 오른쪽에서 왼쪽으로 수평 이동
+- Vertical blinds : 수직 블라인드가 쳐지는 형태로 변환
+- Horizontal blinds : 수평 블라인드가 쳐지는 형태로 변환
+- Checkerboard across : 바둑판 형태의 격자가 왼쪽에서 오른쪽으로 생성
+- Checkerboard down : 바둑판 형태의 격자가 위에서 아래로 생성
+- Random dissove : 안개와 비슷한 형태로 전환
+- Split vertical in : 왼쪽과 오른쪽 끝에서 중앙으로 수직 이동
+- Split vertical out : 중앙에서 양쪽 끝으로 수직 이동
+- Split Horizontal in : 양쪽에서 중앙으로 수평 이동
+- Split Horizontal out : 중앙에서 양쪽 끝으로 수직이동
+- Strips left down : 대각선 형태로 오른쪽 상단에서 왼쪽 하단으로 이동
+- Strips left up : 대각선 형태로 오른쪽 하단에서 왼쪽 상단으로 이동
+- Strips right down : 대각선 형태로 왼쪽 상단에서 오른쪽 하단으로 이동
+- Strips right up : 대각선 형태로 왼쪽 하단에서 오른쪽 상단으로 이동
+- Random bars horizontal : 수평선이 무작위로 생성
+- Random bars vertical : 수직선이 무작위로 생성
+- Random : 임의로 생성
+
+#### Page-Exit: 페이지 나갈때 전환 효과
+
+```html
+<meta http-equiv="Page-Exit" content="revealtrans(Duration=1, Transition=12)" />
+```
+
+17. viewport
+
+반응형 세팅시 어디에서도 동일한 비율로 보여질 수 있도록 최적화된 뷰포트 제공
+
+- width=device-width: 너비를 장치너비로 설정
+- height=device-height: 너비를 장치높이로 설정
+- initial-scale: 초기 화면 배율 1.0 => 100%
+- minimum & maximum scale: 사용자가 극단적으로 화면을 축소하고 확대하는 것을 방지함
+- user-scalable=no: 확대축소 방지
+
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+```
+
+[참고: meta tag 정리](https://inpa.tistory.com/entry/HTML-%F0%9F%93%9A-meta-%ED%83%9C%EA%B7%B8-%EC%A0%95%EB%A6%AC)
+
+[참고: TCP school](http://www.tcpschool.com/html-tags/meta)
+
+[참고: viewport](https://aboooks.tistory.com/352)

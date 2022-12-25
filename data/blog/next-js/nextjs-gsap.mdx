@@ -1,0 +1,57 @@
+---
+title: Next.js에서 gsap 사용하기
+date: '2022-12-25'
+tags: ['react', 'nextjs', 'error', 'gsap']
+draft: false
+---
+
+Next.js가 SSR이다 보니 다른 여타 라이브러리를 사용할때 에러가 자주 발생한다.
+이유는 Next.js는 초기에 렌더링만 서버가 담당하고 이후에는 CSR로 작동 되기 때문에,
+초기에 서버에서의 데이터와 이후 CSR의 데이터가 달라져서 에러가 발생하게 된다.
+
+이런 부분들은 `babel`이나 `next.confing.js`에 추가 세팅을 해주어야 CSR에서 리렌더링을 했을경우
+정상적으로 동작한다.
+
+`gsap`도 마찬가지다. 초기 렌더링 시에는 어찌저찌 동작을 하는 듯 싶다가,
+새로고침을 하면 에러가 발생하면서 `gsap`모듈을 찾을 수 없다는 에러를 발생시킨다.
+
+따라서 Next.js에서 gsap를 사용하기 위해서는 아래 순서를 따라서 사용해주어야 한다.
+
+## 1. gsap 설치
+
+```bash
+npm install gsap
+```
+
+## 2. gsap transpiler 설치
+
+gsap를 next.js 앱에 통합하는데 필요한 모듈을 올바르게 가져오기 위해서는 트랜스파일러가 필요하고,
+아래 트랜스파일러를 설치한다.
+
+```bash
+npm install next-transpile-modules
+```
+
+## 3. next.config.js 설정
+
+위의 트랜스파일러를 사용하기 위해서는 next.config.js에 아래 코드를 추가해준다.
+
+```javscript
+const withTM = require('next-transpile-modules')(['gsap']);
+module.exports = withTM();
+```
+
+## 3. gsap에 필요한 플로그인 전역으로 등록하기
+
+gsap에 필요한 플러그인들(스크롤, 텍스트 등등)은 자동으로 로드되지 않는다.
+따라서 이 플러그인을 전역으로 가져와야 하고, \_app.js에서 다음 코드를 복사해서 넣어주면 된다.
+
+```javscript
+import { gsap } from 'gsap'
+import { CSSPlugin } from 'gsap/CSSPlugin'
+gsap.registerPlugin(CSSPlugin)
+```
+
+이제 gsap를 에러없이 자유롭게 사용 할 수 있다!
+
+[참고: next.js에서 gsap 사용하기](https://youshamahmood96.medium.com/use-gsap-with-nextjs-1c1b8723eb03)

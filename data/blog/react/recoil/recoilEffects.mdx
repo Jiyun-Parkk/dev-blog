@@ -1,0 +1,143 @@
+---
+title: React Recoil Effect 사용해서 localstorage 저장하기
+date: '2023-01-03'
+tags: ['react', 'Recoil', 'Recoil Effect', 'localstorage']
+draft: false
+---
+
+Recoil에서 `Atom Effect`를 사용하면 Recoil의 상태값을 동기화하거나 초기화 하는 기능을 추가할 수 있다.
+`상태 동기화`,`기록 관리`, `로깅` 등 다양한 응용 프로그램이 있고, React에서 `useEffect`와 유사한 효과를 보여준다.
+
+## 1. AtomEffect의 정의
+
+```typescript
+
+type AtomEffect<T> = ({
+  node: RecoilState<T>, // 사용되고 있는 atom 참조
+  storeID: StoreID, // <RecoilRoot> 의 ID 또는 AtomEffect와 연관되어있는 Snapshot store
+  // 현재 인스턴스가 복제된 상위 저장소의 ID이다. 예를들면,
+  // 호스트 <RecoilRoot>는 `useRecoilCallback()` 스냅샷을 저장한다.
+  parentStoreID_UNSTABLE: StoreID,
+  trigger: 'get' | 'set', // Atom 초기화를 트리거한 작업
+
+  // 아톰 값을 설정하거나 재설정하는 콜백.
+  // 이는 아톰 효과 함수에서 직접 호출하여 아톰의 초기값을 초기화하거나
+  // 나중에 비동기적으로 호출하여 변경할 수 있다.
+  setSelf: (
+    | T
+    | DefaultValue
+    | Promise<T | DefaultValue> // 현재 초기화에만 허용됨
+    | WrappedValue<T>
+    | ((T | DefaultValue) => T | DefaultValue),
+  ) => void,
+  resetSelf: () => void,
+
+  // 원자 값의 변경 사항을 구독한다.
+  // 아톰 효과의 자체 setSelf() 변경으로 인해 콜백이 호출되지 않는다.
+  onSet: (
+    (newValue: T, oldValue: T | DefaultValue, isReset: boolean) => void,
+  ) => void,
+
+  // 다른 atom/selector를 읽기 위한 콜백
+  getPromise: <S>(RecoilValue<S>) => Promise<S>,
+  getLoadable: <S>(RecoilValue<S>) => Loadable<S>,
+  getInfo_UNSTABLE: <S>(RecoilValue<S>) => RecoilValueInfo<S>,
+
+}) => void | () => void; // cleanup handler
+```
+
+## 2. AtomEffect 사용하기
+
+AtomEffect는 atom 옵션에 `effects`를 추가해서 사용하면 된다. `effects`는 각 `atom`이 초기화될 때 우선순위에 따라
+호출되는 AtomEffect 함수 배열을 참조한다.
+
+```javascript
+const myState = atom({
+  key: 'MyKey',
+  default: null,
+  effects: [
+    () => {
+      ...effect 1...
+      return () => ...cleanup effect 1...;
+    },
+    () => { ...effect 2... },
+  ],
+});
+
+```
+
+AtomEffect는 대부분 React의 `useEffect()`를 통해 구현할 수 있다. 하지만 Atom은 React 컨텍스트 외부에서 생성되며
+특히 동적으로 생성된 Atom의 경우 React 구성 요소 내에서 관리하기 어려울 수 있다. 또한 React 구성 요소 내에서는 초기 값을 초기화 하거나,
+SSR과 함께 사용 할 수 없다. AtomEffect는 `<RcoilRoot>`를 기반으로 `atom`의 정의와 함께 사용되므로 더 다양하고 원활하게 상태관리가 가능해진다.
+
+## 3. Localstorage 저장하기
+
+Recoil 공식 사이트에서 AtomEffect를 사용하는 방법이 아주 자세하게 나와있는데, Localstorage도 그중에 있다.
+아래코드는 공식 사이트에서 가져온 localstorageEffect 함수다.
+
+```javascript
+
+// key:localstorage에 저장할 key값
+// 해당 키값의 localstorage 데이터 가져오기
+// 만약 localStorage에 데이터가 있다면 atom에 저장한다
+const localStorageEffect = key => ({setSelf, onSet}) => {
+  const savedValue = localStorage.getItem(key)
+  if (savedValue != null) { /
+    setSelf(JSON.parse(savedValue));
+  }
+
+// atom의 데이터가 변경되는지 여부를 구독하면서, 변경이 되면 새로운 값을 localstorage에 저장한다.
+//인자값: 새로운 값, 이전 값, 리셋여부
+  onSet((newValue, _, isReset) => {
+    isReset
+      ? localStorage.removeItem(key)
+      : localStorage.setItem(key, JSON.stringify(newValue));
+  });
+};
+
+const currentUserIDState = atom({
+  key: 'CurrentUserID',
+  default: 1,
+  effects: [
+    localStorageEffect('current_user'),
+	// localStorage에 저장할 키값을 인자로 넣어주고 호출해준다
+  ]
+```
+
+## 4. 실제 적용 코드 width typescript
+
+지금 하고 있는 사이드프로젝트에서 회원가입한 유저의 프로필 정보를 저장하기 위해 localstorage를 활용했다.
+
+### `store/atomEffect.ts`
+
+```typescript
+import { AtomEffect } from 'recoil'
+
+export const localStorageEffect =
+  <T>(key: string): AtomEffect<T> =>
+  ({ setSelf, onSet }) => {
+    const savedValue = localStorage.getItem(key)
+    if (savedValue != null) {
+      setSelf(JSON.parse(savedValue))
+    }
+    onSet((newValue) => {
+      localStorage.setItem(key, JSON.stringify(newValue))
+    })
+  }
+```
+
+### `store/atom.ts`
+
+```typescript
+import { UserProfile } from 'types/auth'
+import { localStorageEffect } from './atomEffect'
+import { atom } from 'recoil'
+
+export const authState = atom<UserProfile>({
+  key: 'auth/profile',
+  default: {
+    displayName: '',
+  },
+  effects: [localStorageEffect('oz-user-profile')],
+})
+```

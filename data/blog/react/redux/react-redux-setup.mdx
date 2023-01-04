@@ -1,0 +1,125 @@
+---
+title: React + Redux + Typescript setup 하기
+date: '2023-01-04'
+tags: ['react', 'Redux', 'Redux toolkit']
+draft: false
+---
+
+React에서 Redux를 사용하려면 두가지 방법이 있다.
+
+1. 직접 하나씩 리덕스를 설치하는 것
+2. CRA와 함께 설치하는 것
+
+1번의 방법은 공식문서를 순서대로 따라서 설치하면 되는데, 2번 방법으로 하면 CRA의 공식 `Redux + JS 템플릿`을 함께 설치해주어서
+`Redux Tollkit + React Redux`를 함께 쓸수 있다.
+
+```bash
+# Redux + Plain JS template
+npx create-react-app my-app --template redux
+
+# Redux + TypeScript template
+npx create-react-app my-app --template redux-typescript
+```
+
+위 명령어로 설치해주면 Redux의 샘플 코드도 함께 생성되어 초기화면에서 기본적인
+카운터 컴포넌트를 볼 수 있다. 그리고 친절하게도 `selector`와 `dispatch` hook도 만들어져 있다.
+
+## 보기 편한방식으로 다시 setup 하기
+
+먼저 기본으로 feature/app 폴더가 만들어지고 내부에 redux 기본 사용 코드가 들어있다.
+이 안에 있는 코드를 대부분 가져와서 활용할건데 먼저 src/store 폴더를 만들어주고 `index.ts`에 아래 코드를 넣어주었다.
+
+### store/index.ts
+
+```typescript
+import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit'
+
+export const store = configureStore({
+  reducer: [],
+})
+
+export type AppDispatch = typeof store.dispatch
+export type RootState = ReturnType<typeof store.getState>
+export type AppThunk<ReturnType = void> = ThunkAction<
+  ReturnType,
+  RootState,
+  unknown,
+  Action<string>
+>
+```
+
+### store/modules
+
+사용할 리듀서함수들을 modules에서 한꺼번에 관리하기로 했다. 그리고 `modules/index.ts`에 모든 리듀서함수들을
+하나로 합쳐주는 rootReducer를 만들어주었다.
+
+```typescript
+import { combineReducers } from '@reduxjs/toolkit'
+import theme from './theme'
+
+const rootReducer = combineReducers({})
+export default rootReducer
+```
+
+그리고 만들어준 `rootReducer`를 `store/index.ts`의 configureStore에서 등록해주었다.
+
+```typescript
+import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit'
+import rootReducer from './modules'
+
+export const store = configureStore({
+  reducer: rootReducer,
+})
+
+export type AppDispatch = typeof store.dispatch
+export type RootState = ReturnType<typeof rootReducer>
+export type AppThunk<ReturnType = void> = ThunkAction<
+  ReturnType,
+  RootState,
+  unknown,
+  Action<string>
+>
+```
+
+#### store/moduels/theme/index.ts
+
+이 프로젝트에서 다크모드와 라이트모드를
+구현할 예정인데, 리덕스가 제대로 연결되었는지 확인하기 위해 우선적으로 `theme`을 체크할 수 있는
+reducer를 구현했다.
+
+```typescript
+import { createSlice } from '@reduxjs/toolkit'
+
+type ThemeType = boolean
+
+const initialState: ThemeType = false
+
+const ThemeSlice = createSlice({
+  name: 'IsDark',
+  initialState,
+  reducers: {
+    changeTheme(state) {
+      state = !state
+    },
+  },
+})
+
+export const { changeTheme } = ThemeSlice.actions
+export default ThemeSlice.reducer
+```
+
+### reducer module 등록
+
+만들어준 `theme`리듀서는 `module/index.ts`에서 등록해준다
+
+```typescript
+import { combineReducers } from '@reduxjs/toolkit'
+import theme from './theme'
+
+const rootReducer = combineReducers({
+  theme,
+})
+export default rootReducer
+```
+
+[참고: Redux 공식문서](https://ko.redux.js.org/introduction/getting-started/)

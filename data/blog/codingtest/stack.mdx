@@ -1,0 +1,67 @@
+---
+title: 자료구조 - 스택
+date: '2023-01-13'
+tags: ['자료구조', 'coding test']
+draft: false
+---
+
+## 🤔 스택이란?
+
+스택은 Last In First Out이라는 개념을 가진 선형 자료구조다. 흔히 책이 쌓여있는 구조를 생각해보면 쉽다.
+책을 쌓아놓으면 밑에 있는 책을 꺼내기 위해서 맨 위에 있는 책부터 꺼내야 한다. 따라서 마지막에 쌓은 책이 가장 첫번째로 나가게 되니 `Last In First Out(LIFO)`가 된다.
+
+스택에서 요소 넣는 것을 `Push`, 없애는 것을 `Pop`이라고 한다. 그리고 가장 위에 있는 요소를 `Top`이라고 한다.
+
+![image](https://user-images.githubusercontent.com/72537762/212276404-95ceead3-0b6e-4a4e-a62f-76525d890e78.png)
+
+> 참고: 프로그래머스 코딩테스트 광탈 방지 A - Z
+
+## ✅ Javascript에서 스택 구현하기
+
+### 1. 배열로 구현하기
+
+Javascript에서 스택을 구현하는 가장 쉬운 방법은 배열을 사용하는 것이다. 특히 Javascript 배열은 이미 `push`와 `pop`메소드가 있어서 구현하기 매우 쉽다.
+
+```javascript
+const arr = [1, 2, 3, 4, 5]
+arr.push(6)
+arr.pop() // 마지막 요소를 없앤다.
+```
+
+### 2. 연결리스트로 구현하기
+
+```javascript
+class Node {
+  constructor(value) {
+    this.value = value
+    this.next = null
+  }
+}
+
+class Stack {
+  constructor() {
+    this.top = null
+    this.size = 0
+  }
+
+  push(value) {
+	const node = New Node(value)
+	node.prev = this.top
+	this.top = node
+	this.size += 1
+  }
+
+  pop() {
+	const node = this.top.value
+	this.top = this.top.prev
+	this.size -= 1
+	return value
+  }
+
+  size() {
+	return this.size
+  }
+}
+```
+
+> 참고: 프로그래머스 코딩테스트 광탈 방지 A - Z

@@ -1,0 +1,141 @@
+---
+title: 자료구조 - 큐(Queue)
+date: '2023-01-14'
+tags: ['자료구조', 'coding test']
+draft: false
+---
+
+## 🤔 큐란?
+
+큐는 스택과 상응되는 개념이라고 보면 된다. 스택은 `Last In First Out`이지만 큐는 `First In First Out`으로 먼저 들어온 데이터가 먼저 처리 된다. 현실 생활에서 생각해보면 놀이공원 줄서기와 같다.
+그리고 스택은 들어가고 나오는 곳이 동일하지만, 큐는 들어가는 것은 `rear` 나오는 곳은 `front`다.
+
+## 🛠 Javascript에서 큐 구현하기
+
+### 👍 Array로 구현 - 선형 큐
+
+선현 큐는 front와 rear가 무한정 커질 수 있다는 단점이 있다.
+
+```javascript
+class Queue {
+  constructor() {
+    this.queue = []
+    this.front = 0
+    this.rear = 0
+  }
+
+  //삽입
+  enQueue(value) {
+    this.queue[this.rear++] = value
+  }
+
+  //삭제
+  deQueue() {
+    const value = this.queue[this.front]
+    delete this.queue[this.front]
+    this.front += 1
+    return value
+  }
+
+  peek() {
+    return this.queue[this.front]
+  }
+
+  size() {
+    return this.rear - this.front
+  }
+}
+```
+
+### 👍 Array로 구현 - 환형 큐
+
+```javascript
+class Queue {
+  constructor(maxSize) {
+    this.maxSize = maxSize // 큐의 크기 제한
+    this.queue = []
+    this.front = 0
+    this.rear = 0
+    this.size = 0
+  }
+
+  enQueue(value) {
+    if (this.isFull()) {
+      console.log('que is full')
+      return
+    }
+
+    this.queue[this.rear] = value
+    this.rear = (this.rear + 1) % this.maxSize
+    // rear가 증가되고 최대크기로 나머지 연산을 해준다
+    // 그럼 크기가 벗어나면 다시 0부터 시작한다
+    this.size += 1
+  }
+
+  deQueue() {
+    const value = this.queue[this.front]
+    delete this.queue[this.front]
+    this.front = (this.front + 1) % this.maxSize
+    this.size -= 1
+    return value
+  }
+
+  isFull() {
+    return this.size === this.maxSize
+  }
+
+  peek() {
+    return this.queue[this.front]
+  }
+}
+```
+
+### 👍 Linked list로 구현 - 선형 큐
+
+```javascript
+class Node {
+  constructor() {
+    this.value = value
+    this.next = null
+  }
+}
+
+class Queue {
+  constructor() {
+    this.head = null
+    this.tail = null
+    this.size = 0
+  }
+
+  enQueue(newValue) {
+    const newNode = new Node(newValue) // 새로운 노드 생성
+    if (this.head === null) {
+      // 아무 노드도 없다면
+      this.head = this.tail = newNode // head와 tail 모두 새로운 노드를 가르킨다
+    } else {
+      // 다른 노드가 있다면
+      this.tail.next = newNode // 기존 마지막 노드의 다음 노드로 새로운 노드 지정
+      this.tail = newNode // 새로운 노드를 마지막 노드로 지정
+    }
+
+    this.size += 1
+  }
+
+  deQueue() {
+    const value = this.head.value
+    this.head = this.head.next
+    this.size -= 1
+    return value
+  }
+
+  peek() {
+    return this.head.value
+  }
+}
+```
+
+## ✅ 큐를 구현할때 shift() 함수는 쓰지말기!
+
+자바스크립트에서 `shift()`메소드를 사용하면 맨 앞의 요소를 삭제하기 때문에 뒤의 요소들이 하나씩 당겨온다. 따라서 `O(n) 선형시간`이 소요되어 큐를 사용하는 의미가 없어진다.
+
+> 참고: 프로그래머스 코딩테스트 광탈 방지 A - Z

@@ -1,0 +1,61 @@
+---
+title: Error 기록 - Next.js Error Abort fetching for route '/'
+date: '2023-01-25'
+tags: ['nextjs', 'React', 'error']
+draft: false
+---
+
+## ❌ 에러 발생 상황
+
+회원가입 완료 후 메인 라우트로 이동시 아래와 같은 에러 문구가 떴다
+
+```text
+Error: Abort fetching for route: "/"
+```
+
+## ✅ 원인
+
+원인은 `useEffect`안에서 라우팅을 했기 때문이다.
+아래 코드를 보면 참조값이 빈 배열이기 때문에 안에 있는 코드는 한번만 실행되는 것이 맞다.
+하지만 아래 코드는 두번 실행되었다.
+
+왜냐하면 `next.config.js`에서 `React.StrictMode`가 true로 설정 되어 있기 때문이다.
+
+```javascript
+useEffect(() => {
+  setTimeout(() => router.push('/'), 3300)
+}, [])
+```
+
+따라서 라우트가 한번만 이동해야 할 것을 두번 실행시키게 되면서, `이 경로로 이동하는 것을 중단하라`라는 경고문이 뜬 것이다.
+
+해결 방법은 두가지가 있다.
+
+## ✅ React.strictMode를 계속 쓰고 싶다면
+
+strictMode를 계속 쓰는 것이 좋다면 아래와 같이 router의 `shallow`옵션을 `true`로 변환시켜주면 된다.
+
+next.js에서 route를 push 하면 data fetching 메서드인 `getStaticProps`, `getServerSideProps`, `getInitialProps`가 실행된다. 하지만 `shallow`옵션을 true로 하면 해당 메소드들이 실행되지 않고
+현재 페이지의 경로를 변경시켜준다.
+
+### router.push 옵션
+
+- 이동할 url(필수)
+- as : 브라우저에 주소표시줄에 보여질 url(선택)
+- 옵션(선택)
+
+> 만약 두번째 옵션인 as가 있다면 shallow 옵션은 동작하지 않는다. as로 추가해준 경로로 새페이지를 로드하고 데이터를 가져오기 때문에, shallow는 무시가 된다.
+
+```javascript
+useEffect(() => {
+  setTimeout(() => router.push('/', undefined, { shallow: true }), 3300)
+}, [])
+```
+
+## ✅ React.strictMode를 안쓰면 된다
+
+`React.strictMode`를 안쓰면 두번 호출되지 않으니 자연스럽게 해결된다.
+
+[참고: Next.js router](https://www.nextjs.cn/docs/api-reference/next/router)
+
+[참고: Next.js shallow routing](https://www.nextjs.cn/docs/routing/shallow-routing)

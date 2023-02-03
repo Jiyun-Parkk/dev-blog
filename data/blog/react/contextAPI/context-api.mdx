@@ -1,0 +1,67 @@
+---
+title: React의 Context API
+date: '2023-01-04'
+tags: ['react', 'Context-api']
+draft: false
+---
+
+react는 16.3버전부터 context api를 지원하고 있다. context는 redux나 recoil과 같이 전역 상태관리를 할 수 있는 툴이다.
+
+## 1. React.createContext & Provider
+
+먼저 context 객체를 만든다. 컴포넌트가 이 context를 가지기 위해서는 상위 컴포넌트를 `provider`로 감싼다
+
+```javascript
+import { createContext } from 'react'
+
+export const MyContext = createContext(defaultValue)
+```
+
+여기서 defaultValue는 트리 안에 적절한 provider를 찾지 못했을 때 쓰는 값이다.
+해당 store가 어떠한 provider에 할당되지 않은 경우 완전 독립적인 context를 유지할 떄 쓰인다.
+
+```javascript
+export function App({ children }) {
+  return <MyContext.Provider value={state}>{children}</MyContext.Provider>
+}
+```
+
+`provider`는 정의한 context를 하위 컴포넌트에게 전달하는 역할을 한다. `provider`를 전달하는 변수는 꼭 `value`를 사용해야한다.
+`provider`하위에 `provider`배치가 가능하고 이 경우 하위 `provider`가 우선시 된다.
+`provider` 하위에 있는 component가 context를 가지고 있으면 해당 state가 변화할때 모두 리렌더링이 된다.
+
+## 2. Context.Consumer
+
+consumer는 context의 변화를 구독하는 컴포넌트다. 상위 provider가 없다면 `createContext()`에서 정의한 `defaultValue` 가져온다.
+
+### 사용예시
+
+#### 단일 사용
+
+```javascript
+import React from 'react'
+
+const Store = React.createContext('')
+export default Store
+```
+
+#### 여러 context 하나로 모으기
+
+```javascript
+import React from 'react'
+
+const rootStore = React.createContext({ cxt: 'test' })
+export default rootStore
+```
+
+#### provider
+
+```javascript
+import Store from 'store'
+import { useReducer } from 'react'
+
+export const App = () => {
+  const [state, dispatch] = useReducer(reducer, initialValue)
+  return <Store.Provider value={state}></Store.Provider>
+}
+```

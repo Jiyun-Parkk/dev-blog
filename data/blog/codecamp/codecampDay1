@@ -1,0 +1,41 @@
+---
+title: 코드캠프 x 인프런 프론트엔드 압축 코스 Day1
+date: '2023-01-05'
+tags: ['코드캠프 x 인프런', '프론트엔드 부트캠프']
+draft: true
+---
+
+node.js
+리눅스 명령어
+cli 명령어
+리액트 폴더 구조
+
+getstaticprops getstaticpaths getserversideprops
+usestate 원리
+Setinterval 적용하기
+userouter
+https://chaeyoung2.tistory.com/53
+https://snubi.tistory.com/3
+https://velog.io/@mskwon/next-js-static-generation-fallback
+https://nextjs.org/learn/basics/dynamic-routes/implement-getstaticprops
+https://salgum1114.github.io/nextjs/2019-05-24-nextjs-static-website-4/
+https://velog.io/@adguy/react-hook-%EC%9D%98-setState%EC%97%90%EC%84%9C-callback-function-%EC%82%AC%EC%9A%A9
+https://overreacted.io/ko/how-are-function-components-different-from-classes/
+https://gingerkang.tistory.com/122
+https://bsnn.tistory.com/50
+
+error 기록
+Property 'value' does not exist on type 'EventTarget'.
+const onChangeBodyInfo = (event: { target: HTMLInputElement }) => {
+console.log(event.target.name);
+};
+
+const handleChange = (event: FormEvent<HTMLFormElement>) => {
+console.log(event.target.name);
+};
+const handleChange = (event: React.ChangeEvent<HTMLFormElement>) => {
+console.log(event.target.name);
+};
+
+BaseSyntheticEvent<Event, EventTarget & HTMLFormElement, EventTarget>.target: EventTarget
+ChangeEvent<HTMLFormElement>.target: EventTarget & HTMLFormElement

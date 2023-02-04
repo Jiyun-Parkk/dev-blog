@@ -1,0 +1,93 @@
+---
+title: React hook 알아보기
+date: '2023-02-05'
+tags: ['react', 'react-hook', 'react_basic']
+draft: false
+---
+
+useEffect는 컴포넌트가 렌더링 된 후에 실행되는 훅이다. 그래서 만약
+컴포넌트가 렌더링 된 후에 실행하고자 하는 코드가 있다면 useEffect 내부에서 처리해주면 된다.
+
+클래스 컴포넌트에서는 `componentDidMount`, `componentDidUpdate` ,`componentDidUnMount`라이프사이클과 관련이 있다.
+
+useEffect를 사용할때는 두가지 인자를 넣어준다.
+
+1. 콜백함수
+2. 의존값 배열
+
+## 🛠 useEffect 사용하기
+
+기본적인 사용법은 아래와 같다.
+
+만약 아래와 같이 의존값을 생략한다면, 리렌더링이 될때마다 호출이 된다.
+그래서 자칫 잘못하면 무한 루프에 빠져 갑자기 페이지가 멈추게 될 수도 있다.
+
+```javascript
+import React, { useEffect } from 'react'
+
+const Home = () => {
+  useEffect(() => {
+    console.log('rendering')
+  })
+}
+```
+
+무한 루프에 빠지게 되는 대표적인 경우가 useEffect 콜백함수 내부에서 사용하고 있는 함수가 계속해서 호출되는 경우다.
+
+그렇기 때문에 왠만하면 의존배열을 써주어야 한다. 그래야 최적화된 성능의 컴포넌트를 만들 수 있다.
+
+## 🛠 의존배열 사용하기
+
+### 1. 빈배열로 사용하기
+
+먼저 의존배열을 빈배열로 설정하면 컴포넌트가 처음 렌더링되었을 때 딱 한번만 콜백함수를 실행해준다.
+
+아래 코드를 실행하면 컴포넌트가 처음 렌더링 되었을떄 딱 한번만 로컬스토리지에 데이터를 저장해준다.
+
+```javascript
+const Home = () => {
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setState(window.localstorage.setItem('test', 'test'))
+    }
+  }, [])
+}
+```
+
+### 2. 참조값이 변할때마다 실행시켜주기
+
+의존배열에 참조하고 싶은 값을 넣어주면, 해당 값이 변화될때마다 콜백함수가 실행된다.
+
+아래 코드를 실행하면 count라는 상태값이 변화될때마다 콘솔이 찍히게 될 것이다.
+
+```javascript
+const Home = () => {
+  const [count, setCount] = useState(0)
+
+  useEffect(() => {
+    console.log(count)
+  }, [count])
+}
+```
+
+## 🛠 cleanup(정리하기 함수) 사용하기
+
+useEffect의 콜백함수는 클래스 컴포넌트에서의 `componentDidMount`, 의존 배열은 `componentDidUpdate` 메서드와 관련이 있다.
+
+그리고 useEffect 콜백함수 내부에서 또 콜백함수를 옵션으로 지정해줄 수 있는데, 이 함수는 컴포넌트가 렌더트리에서 사라졌을때 실행된다.
+
+그리고 이른바 cleanup(정리하기 함수)로 불려진다. 이 정리하기 함수는 클래스 컴포넌트에서 `componentDidUnMount` 메서드에 해당한다.
+
+아래 예시는 `setTimeout`을 사용했을때다. 컴포넌트가 렌더링 되었을때 setTimeout 함수가 실행되고, 컴포넌트가 사라질때 clearTimeout 함수를 사용하여 timer를 종료시킨다.
+
+```javascript
+const Home = () => {
+  useEffect(() => {
+    const timer = setTimeout(() => console.log('a'), 2000)
+
+    return () => clearTimeout(timer)
+  }, [])
+}
+```
+
+처음 리액트를 공부할 때 useEffect가 제일 헷갈렸던 것 같다. 간단한 듯 하면서 또 알수없는 오류가 계속 났었던..ㅠ 하지만 그것이 다 컴포넌트의 라이프사이클을 이해하지 못해서 그런 것이었다. 다음에는 useState를 정리해보자!

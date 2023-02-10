@@ -59,6 +59,8 @@ cookie는 key/value 형태로 저장되고, 경로와 유효기간을 설정할 
 
 > XSS란 웹 해킹 공격 기법중 하나로, 본래 Cross Site Scripting이지만 CSS가 이미 존재하므로 XSS라 한다. XSS는 클라이언트 즉, 사용자를 대상으로 한 공격으로 게시판이나 웹메일에 자바스크립트 코드를 삽입해서 개발자가 고려하지 않는 기능이 작동하게 하는 공격이다.
 
+추가로 secure 옵션을 주면 https 접속에서만 동작하게 할 수 있다.
+
 만약 로그인을 해서 쿠키에 유저의 로그인 정보를 기록하면 아래와 같은 값들을 확인 할 수 있다.
 
 ```
@@ -106,8 +108,16 @@ Token에도 다양한 유형이 있지만 가장 많이 사용 하는 것은 JWT
 
 - 토큰의 유형 타입을 지정
 - 해싱 알고리즘을 지정. 보통 HMAC-SHA256 혹은 RSA가 사용되고 둘다 암호화 방식이 달라 토큰을 해석하는 방식도 다르다.
-- payload: claim이 포함되는 영역으로 전송하고자 하는 여러 데이터가 담긴다.
-- signature: Base64로 인코딩 된 header, payload와 서버만이 가지고 있는 비밀 키를 설정한 알고리즘으로 암호화한 값이 담긴다.
+
+### payload
+
+- claim이 포함되는 영역으로 전송하고자 하는 여러 데이터가 담긴다.
+- 토큰에 담을 정보
+- claim은 Json 형태의 한쌍으로 이루어져 있다.
+
+### signature
+
+- Base64로 인코딩 된 header, payload와 서버만이 가지고 있는 비밀 키를 설정한 알고리즘으로 암호화한 값이 담긴다.
 
 ```bash
 // Header, Payload, Signature는 "."로 구분된다.
@@ -122,6 +132,27 @@ header,payload,signature로 구성된 정보들은 `.`을 구분자로 위 예�
 JWT가 서버에 도착하면 서버는 자신이 발행한 토큰이 맞는지 확인한다. 이 과정은 암호화 방식에 따라 차이가 있다고 한다.
 
 JWT를 사용할 경우 암호화 된 토큰이기 때문에, 앞서서 걱정했던 보안에 대한 고민을 덜 수 있다. 따라서 클라이언트 측에서는 localstorage, cookie 두가지 선택지가 있다고 한다. 둘다 장단점이 있기 때문에 그때그때 맞는 방법을 사용하면 된다.
+
+### Access Token & Refresh Token
+
+token은 발급 시 유효기간 동안 되돌릴 수 없고 access token을 탈취당할 시 인증 정보가 모두 담겨 있으므로 위험하다. 그래서 서버에서는 access token과 refresh token 두개의 토큰을 발행한다.
+
+#### 🛠 Access Token
+
+인증된 유저인지 서버에서 검증하는 토큰이다. 클라이언트 쪽에서 요청 헤더에 담아 보내는 토큰이다.
+
+#### 🛠 Refresh Token
+
+access token이 만료되거나 잘못된 토큰일 경우 refresh token을 사용해서 유저를 검증한다. 만약 refresh token을 검증하여 인증된 유저일 경우 access token을 재발행 해준다.
+
+정리해보면 Access Token의 유효기간을 짧게 설정하고 Refresh Token의 유효기간을 길게 설정하여 access token 만료시 refresh token을 검증하여 access token을 재발행 해주는 것으로 보안적으로 안전하게 유저 인증을 관리 할 수 있다고 한다.
+
+## ✅ 정리하기
+
+- 사용자가 로그인을 하면 Access Token, Refresh Token을 받는다
+- Access Token은 만료시간을 짧게 설정하여 리턴, Refresh Token은 만료시간을 길게 설정하여 httpOnly로 cookie에 저장
+- 이후 인증된 유저임을 알리기 위해 Authorization header에 access token을 포함하여 요청을 보낸다
+- access token 만료시 refresh token을 이용해 access token을 재발급 받는다.
 
 [참고: 지마켓 기술 블로그](https://dev.gmarket.com/45)
 

@@ -1,0 +1,370 @@
+---
+title: Next.js에서 firebase auth 적용하기
+date: '2023-02-10'
+tags: ['react', 'nextjs', 'firebase']
+draft: false
+---
+
+Next.JS에서 firebase auth를 적용하려면 firebase client sdk와 admin sdk 두개를 세팅해줘야 한다.
+
+먼저 아래 명령어로 패키지들을 설치해준다.
+
+```bash
+npm install firebase firebase-admin next-cookies cookie
+```
+
+1. firebase : firebase client sdk를 사용하기 위한 패키지
+2. firebase-admin : firebase admin sdk를 사용하기 위한 패키지
+3. next-cookies: next의 서버에서 사용할 쿠키 관련 패키지
+4. cookie : 쿠키 세팅을 위한 패키지
+
+## 1. 기본 firebase 세팅하기 (client)
+
+우선 firebase에 생성한 프로젝트의 key들을 다운받아서 env 파일에 저장해준다. key는 프로젝트 설정에서 볼 수 있다.
+
+기본적으로 필요한 키 리스트는 아래와 같다.
+
+```env
+//.env
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_CLIENT_EMAIL=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+FIREBASE_PRIVATE_KEY=
+```
+
+나는 services/firebase.ts 파일에 SDK 코드를 넣어줬다. auth와 firestore database를 쓸 예정이라 `getAuth()`, `getFirestore()`를 추출해주었다.
+
+```javascript
+// services/firebase.ts
+
+import { getApp, getApps, initializeApp } from 'firebase/app'
+import { getAuth } from 'firebase/auth'
+import { getFirestore } from 'firebase/firestore'
+
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+}
+
+const firebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp()
+export const firebaseAuth = getAuth(firebaseApp)
+export const firestore = getFirestore()
+```
+
+자 이제 `firebaseAuth`를 호출하여 로그인, 로그아웃, 회원가입 등의 firebase 기능을 사용 할 수 있게 된다.
+
+그런데 로그인 기능을 사용하기 위해서는 로그인한 유저의 인증과 인가 과정이 필요하다. 인증/인가 과정은 로그인을 위한 서버에서 체크를 해주어야 하는데, firebase auth의 인증/인가 시스템을 사용하기 위해서는 firebase-admin 패키지를 활용해야 한다.
+
+## 2. firebase-admin SDK 세팅하기
+
+위에서 세팅했던 firebase SDK는 클라이언트 측에서 사용할 수 있는 메소드들이다. 사용자가 직접 로그인을 하거나 회원가입을 하는 등의 기능을 도와준다. 그리고 firebase-admin은 서버측에서 firebase 데이터를 직접적으로 관리할 수 있는 권한을 준다.
+
+예를 들어서, 회원들의 정보 조회, 회원 인증, 회원 삭제 등의 일들은 당연히 관리자만이 할 수 있는 일이다.
+
+사실 일반적인 React 프로젝트에서는 firebase-admin을 세팅해줄 필요가 없다. 하지만 Next.js에서는 로그인 혹은 로그아웃시 인증/인가 체크를 Next.js의 서버사이드에서 해주면 인증되지 않은 유저는 사전에 차단해줄 수 있기 때문에, firebase-admin SDK를 활용해서 서버사이드를 적극 활용해주면 좋다.
+
+Next.js의 공식문서에서도 권장하고 있는 방법이 여러가지가 있다. next-firebase-auth라는 라이브러리도 있는데 이번에 Next.js가 13버전으로 업그레이드 되고 firebase 버전도 9버전을 쓰면서 해당 라이브러리가 잘 적용이 되지 않는 것 같았다.
+
+[Next.js 공식문서: Authenication](https://nextjs.org/docs/authentication)
+
+그래서 이 라이브러리와 유사한 방법으로 로그인 인증/인가를 구현해보려고 한다.
+
+그럼 이제 firebase-admin을 세팅해보자.
+
+먼저 .env 파일에 아래 코드를 추가해주자. 아래의 환경 변수가 설정되면 Firebase admin SDK가 인증 애뮬레이터에 자동으로 연결된다.
+
+```
+export FIREBASE_AUTH_EMULATOR_HOST="127.0.0.1:9099"
+```
+
+firebase-admin sdk 설정은 아래와 같이 해주었다.
+
+```javascript
+// services/admin.ts
+
+import admin from 'firebase-admin'
+
+const adminConfig = {
+  credential: admin.credential.cert({
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    clientEmail: process.env.NEXT_PUBLIC_FIREBASE_CLIENT_EMAIL,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+  }),
+}
+
+export const firebaseAdmin = admin.apps.length ? admin.app() : admin.initializeApp(adminConfig)
+export const adminAuth = firebaseAdmin.auth()
+export const adminStore = firebaseAdmin.firestore()
+```
+
+## 3. 로그인 기능 구현하기
+
+로그인을 하려면 대략적으로 아래 과정을 거쳐야 한다.
+
+[로그인시]
+
+1. 사용자가 로그인을 한다.
+2. 사용자의 고유 토큰을 발행한다.
+3. 사용자의 토큰의 유효성을 체크한다.
+4. 토큰을 쿠키에 저장해준다.
+
+[서비스 이용시]
+
+1. 쿠키에 저장된 토큰이 유효한 토큰인지 체크해준다.
+2. 토큰이 유효한지 확인이 되면 서비스에 진입 할 수 있도록 허용해준다.
+
+위 과정을 참고하여 차근차근 구현해보자.
+
+### 1) 클라이언트에서 로그인 기능 구현
+
+#### ✅ firebase login API
+
+```javascript
+// apis/auth.ts
+
+import { firebaseAuth } from 'services/firebase'
+import { signInWithEmailAndPassword, UserCredential } from 'firebase/auth'
+
+export const authAPI = {
+  signin: (data: RequestAuth): Promise<UserCredential> => {
+    return signInWithEmailAndPassword(firebaseAuth, data.email, data.password)
+  },
+}
+```
+
+#### ✅ login 페이지 => 로그인 버튼 클릭 이벤트 콜백함수
+
+사용자가 로그인을 하면 아래와 같이 `getIdToken()`함수로 사용자의 고유 토큰을 생성한다. 주의 할 점은 이 토큰의 유효기간 생성하고 1시간이다.
+
+```javascript
+// pages/login.tsx
+
+import { authAPI } from 'apis/auth'
+
+const onValidSignin = async ({ email, password }: RequestAuth) => {
+  setSigninError('')
+  try {
+    const { user } = await authAPI.signin({
+      email,
+      password,
+    })
+    const token = await user.getIdToken()
+    router.push('/')
+  } catch (error) {
+    if (error instanceof FirebaseError) {
+      setSigninError(`${error.code}`)
+    }
+  }
+}
+```
+
+토큰의 유효기간이 1시간이기 때문에 이것을 쿠키에 저장해서 유저 인증을 체크하기에는 무리가 있다.
+
+따라서 아래 과정을 거쳐서 인증을 해주어야 한다.
+
+1. 유저의 토큰 유효성 검사
+2. 유저의 토큰이 유효하다면 sessionCookie를 생성한다.(최대 2주까지 기간 설정 가능)
+3. sessionCookie를 쿠키에 저장해준다.
+
+이 과정을 구현하려면 이제 firebase-admin을 활용해야한다. pages/api에서 구현하면 아래와 같다.
+
+```javascript
+// pages/api/auth/login.ts
+
+import { InitialUserInfo } from 'consts/initialUserInfo'
+import { serialize } from 'cookie'
+import { NextApiRequest, NextApiResponse } from 'next'
+import { adminAuth } from 'services/admin'
+
+export default async (req: NextApiRequest, res: NextApiResponse) => {
+  const { token } = req.body
+  const verifyToken = async (token: string) => {
+    return await adminAuth.verifyIdToken(token, true)
+  }
+  const verifyUser = async (user: string) => {
+    return await adminAuth.verifySessionCookie(user, true)
+  }
+  const createCookie = async (token: string) => {
+    return await adminAuth.createSessionCookie(token, {
+      expiresIn: 336 * 60 * 60 * 1000,
+    })
+  }
+
+  if (token) {
+    try {
+      await verifyToken(token)
+      const getSessionCookie = await createCookie(token)
+      const userToken = serialize('user', getSessionCookie, {
+        httpOnly: true,
+        path: '/',
+        expires: new Date(Date.now() + 336 * 60 * 60 * 1000),
+
+      res.setHeader('Set-Cookie', userToken)
+      res.status(200).json({ message: 'successfully save token' })
+    } catch (error) {
+      res.status(401).json({ message: 'invlalid token' })
+    }
+  }
+}
+```
+
+그리고 로그인 이벤트에 아래와 같이 코드를 추가해준다.
+
+#### ✅ 직접만든 로그인 API
+
+```javascript
+// apis/auth.ts
+
+export const localAuth = {
+  signin: async (token: string): Promise<UserInfoType> => {
+    const { data } = await axios({
+      method: 'POST',
+      url: '/api/auth/login',
+      data: { token },
+    })
+    return data.userInfo
+  },
+}
+```
+
+#### ✅ login 페이지 => 로그인 버튼 클릭 이벤트 콜백함수
+
+```javascript
+// pages/login.tsx
+
+import { authAPI, localAuth } from 'apis/auth'
+
+const onValidSignin = async ({ email, password }: RequestAuth) => {
+  setSigninError('')
+  try {
+    const { user } = await authAPI.signin({
+      email,
+      password,
+    })
+    const token = await user.getIdToken() // 1시간짜리 고유 토큰 발행
+    const userInfo = await localAuth.signin(token)
+    // 해당 토큰을 바탕으로 세션쿠키토큰 발행 => 쿠키에 저장
+
+    router.push('/')
+  } catch (error) {
+    if (error instanceof FirebaseError) {
+      setSigninError(`${error.code}`)
+    }
+  }
+}
+```
+
+이제까지 세팅한 것으로 로그인 기능은 완성이다. 위 과정을 정리하면 아래와 같다.
+
+1. signInWithEmailAndPassword 으로 로그인
+2. 로그인 후 받아오는 user로 `getIdToken()`을 통해 1시간짜리 고유 토큰 발행
+3. next.js 서버의 로그인 api따로 생성
+4. 해당 api에서 1시간짜리 토큰의 유효성 체크
+5. 해당 토큰과 함께 firebase-admin `createSessionCookie()`으로 2주짜리 토큰 발행
+6. 2짜리 토큰을 쿠키에 동일하게 2주기간으로 저장
+
+## 4. 로그아웃 기능 구현하기
+
+로그아웃은 쿠키값을 삭제해주면 된다.
+
+import { NextApiRequest, NextApiResponse } from 'next'
+import { serialize } from 'cookie'
+
+export default async (req: NextApiRequest, res: NextApiResponse) => {
+  const userToken = serialize('user', '', {
+    httpOnly: true,
+    path: '/',
+    expires: new Date(Date.now() - 24 * 60 * 60 * 1000),
+  })
+  res.setHeader('Set-Cookie', userToken)
+  res.status(200).json({ message: 'Successfully remove cookie!' })
+}
+
+> 참고로 쿠키를 세팅할 때 httpOnly 옵션을 주면 클라이언트에서 javascript로 cookie 값에 접근 할 수 없다. XSS 공격을 막아줄 수 있다.
+
+## 5. getServerSideProps에서 로그인 인증 체크하기
+
+서비스 내부에는 로그인에 상관없이 모두 볼 수 있는 서비스, 로그인 한 유저만 사용 할 수 있는 서비스로 나누어져 있다. 따라서 로그인한 유저만 사용할 수 있는 서비스를 만들기 위해 `getServerSideProps`를 활용해볼 수 있다.
+
+먼저 로그인한 유저만 진입할 수 있는 페이지 하단에 아래 코드를 추가해준다.
+
+cookie는 context 파라미터에서 받아올 수 있다. next-cookies를 사용해서 쿠키를 불러오면 쿠키 값을 객체로 변환시켜준다.
+
+```javascript
+import cookies from 'next-cookies'
+export const getServerSideProps = async (context: GetServerSidePropsContext) => {
+  const { user } = cookies(context)
+}
+```
+
+이 쿠키값을 매개로 `verifySessionCookie`을 통해 사용자 인증을 할 수 있다.
+
+```javascript
+import cookies from 'next-cookies'
+export const getServerSideProps = async (context: GetServerSidePropsContext) => {
+  const { user } = cookies(context)
+
+  import { InitialUserInfo } from 'consts/initialUserInfo'
+  import { GetServerSidePropsContext } from 'next'
+  import { adminAuth, adminStore } from 'services/admin'
+  import { serialize } from 'cookie'
+
+  export interface VerifyUserType {
+    user: string | undefined;
+    context: GetServerSidePropsContext;
+    propsOption?: Object;
+  }
+
+  const current = context.resolvedUrl
+  const verifyUser = async (user: string) => {
+    return await adminAuth.verifySessionCookie(user, true)
+  }
+
+  if (user) {
+    try {
+      await verifyUser(data.user)
+      if (current === '/signin' || current === '/signup') {
+        return {
+          redirect: {
+            destination: '/',
+          },
+        }
+      }
+    } catch (error) {
+      const userToken = serialize('user', '', {
+        httpOnly: true,
+        path: '/',
+        expires: new Date(Date.now() - 24 * 60 * 60 * 1000),
+      })
+      context.res.setHeader('Set-Cookie', userToken)
+      if (current === '/bodycheck' || current === '/activecheck') {
+        return {
+          redirect: {
+            destination: '/signin',
+          },
+        }
+      }
+    }
+  } else {
+    if (current === '/bodycheck' || current === '/activecheck') {
+      return {
+        redirect: {
+          destination: '/signin',
+        },
+      }
+    }
+  }
+
+  return {
+    props: {},
+  }
+}
+```
+
+위 코드는 유저의 토큰을 검사하여 유효한 토큰이라면, 로그인 혹은 회원 가입 페이지 진입시 메인 페이지로 리다이렉트 시킨다.
+
+유효하지 않은 토큰이라면 서비스 페이지 진입시 로그인 화면으로 리다이렉트 시킨다.
+
+로그인 인증/인가 구현에 대한 경험이 적어서 이번 작업을 하면서 상당히 애먹었다. 많은 자료를 찾아보고 한것이긴 하지만 맞는 방법인지는 아직도 애매모호 하다. 실무에서 어떻게 하는지 알면 좋을텐데,,너무 아쉽다 ㅎㅎ 아직 공부가 너무 많이 필요한 로그인 과정..! 그래도 로그인 과정을 많이 이해할 수 있는 계기가 되서 나름대로 뿌듯한 작업이 되었다.

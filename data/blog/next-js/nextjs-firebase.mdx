@@ -283,6 +283,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   res.setHeader('Set-Cookie', userToken)
   res.status(200).json({ message: 'Successfully remove cookie!' })
 }
+```
 
 > 참고로 쿠키를 세팅할 때 httpOnly 옵션을 주면 클라이언트에서 javascript로 cookie 값에 접근 할 수 없다. XSS 공격을 막아줄 수 있다.
 

@@ -269,8 +269,7 @@ const onValidSignin = async ({ email, password }: RequestAuth) => {
 
 로그아웃은 쿠키값을 삭제해주면 된다.
 
-````javascript
-
+```javascript
 import { NextApiRequest, NextApiResponse } from 'next'
 import { serialize } from 'cookie'
 
@@ -300,7 +299,7 @@ import cookies from 'next-cookies'
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
   const { user } = cookies(context)
 }
-````
+```
 
 이 쿠키값을 매개로 `verifySessionCookie`을 통해 사용자 인증을 할 수 있다.
 

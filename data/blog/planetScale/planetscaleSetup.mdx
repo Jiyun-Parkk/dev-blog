@@ -76,3 +76,36 @@ pscale database create <database name> --region <region slug>
 
 물론 사이트에서 직접 만들어줄 수도 있긴 하다! 하지만 CLI에 익숙하면 이 방법이 더 편해진다.
 위 명령어로 만들고 PlanetScale 페이지에 들어가보면 database가 만들어진 것을 확인 할 수 있다.
+
+## 4. database 연결하기
+
+만들어진 database를 사용할 프로젝트에서 connet 명령을 하면 database를 손쉽게 연결할 수 있다.
+본래 AWS나 Postgres와 같은 다른 database들은 보통 database 암호를 사용해서
+가상의 database와 실제 database 두가지를 운용한다.
+
+하지만 planetScale은 간단한 명령어로 database를 연결해서 사용 할 수 있다.
+
+```bash
+pscale connect <database name>
+```
+
+### 연결 성공 결과
+
+```
+Secure connection to database carrot-market and branch main is established!.
+
+Local address to connect your application: 127.0.0.1:3306 (press ctrl-c to quit)
+```
+
+위와 같은 문구가 나왔다면 연결에 성공한 것이다.
+`127.0.0.1:3306`으로 연결이 되었다는 것이기 때문에, 해당 터미널을 삭제하지 말고 유지해야 한다.
+
+### prisma에 연결하기
+
+prisma에서 이 데이터베이스를 연결하려면 위에서 연결된 `127.0.0.1:3306`을 복사해서 .env 파일에 붙여넣어준다.
+
+```
+DATABASE_URL=mysql://127.0.0.1:3306/carrot-market
+```
+
+그럼 이제 연결 끝!

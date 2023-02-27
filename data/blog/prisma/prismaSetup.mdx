@@ -1,0 +1,80 @@
+---
+title: nextjs-Prisma setup 하기
+date: '2023-02-20'
+tags: ['prisma', 'nextjs']
+draft: false
+---
+
+먼저 prisma를 dev dependency로 설치해준다.
+
+```bash
+npm i -D prisma
+```
+
+prisma 설치가 완료되면 아래 명령어를 입력해준다.
+
+```bash
+npx prisma init
+```
+
+위 명령어를 실행하면 prisma 폴더가 생기고 기본 schema 파일이 생긴다. 그리고 .env 파일이 생성되고 .env에는 `DATABASE_URL` 값이 담겨져 있다.
+
+`npx prisma init`를 입력하고 터미널에 나타난 문구들을 한번 일어보자
+
+```bash
+You already have a .gitignore file. Don't forget to add `.env` in it to not commit any private information.
+
+
+Next steps:
+1. Set the DATABASE_URL in the .env file to point to your existing database. If your database has no tables yet, read https://pris.ly/d/getting-started
+2. Set the provider of the datasource block in schema.prisma to match your database: postgresql, mysql, sqlite, sqlserver, mongodb or cockroachdb.
+3. Run prisma db pull to turn your database schema into a Prisma schema.
+4. Run prisma generate to generate the Prisma Client. You can then start querying your database.
+```
+
+### ✅ .env .gitignore에 추가하기
+
+> 당신은 이미 .gitignore 파일이 있습니다. env 파일을 .gitignore에 추가하는 것을 잊지말아주세요.
+
+이렇게 간곡히 부탁하니 gitignore에 .env를 추가해주자. 이제 commit 할때 변경된 파일 목록에 노출되지 않는다.
+
+### ✅ 1. .env의 DATABASE_URL에 당신의 Database url을 추가해주세요
+
+.env의 DATABASE_URL 기본적으로 세팅되어 있는 url이 있는데 내가 사용할 database의 url을 넣어주면 된다. 나는 serverless platform인 `planetscale`을 활용 할 것이다.
+
+#### 👋 PlanetScale이란?
+
+PlanetScale은 MySQL과 호환되는 서버리스 데이터베이스 플랫폼이다. PlanetScale은 Vitess를 사용하는데, Vitess는 MySQL을 스케일링하기 위한 데이터베이스 클러스터링 시스템이다.
+
+> 데이터 스케일링: 데이터 전처리 과정의 하나. 데이터 값의 범위를 조정하는 것을 말한다.
+
+> 데이터 클러스터링: 하나의 군집에 있고 각 데이터 포인트가 서로 비슷한 데이터를 분류해주는 작업
+
+[PlanetScale 연결하기 & setup](https://june-dev.vercel.app/blog/planetScale/planetscaleSetup)
+
+#### 👋 Vitess를 사용하는 이유
+
+- 수평스케일: horizontal sharding으로 제한 없이 데이터베이스를 추가 할 수 있다.
+- 고가용성 : 데이터베이스의 복사본을 여러 장소에 저장해준다.
+- MySQL호환 : MySQL이 호환되어서 코드를 많이 수정하지 않아도 된다.
+- 온라인 스키마 마이그레이션 : 관계형 데이터베이스 스키마를 관리하는 것.
+
+[참고: PlanetScale DOCS](https://planetscale.com/docs/concepts/what-is-planetscale)
+
+### ✅ 2. datasource의 provider를 schema.prisma에 세팅해주세요
+
+provider는 우리가 사용할 database라고 생각하면 된다. provider는 postgresql, mysql, sqlite, sqlserver, mongodb, cockroachdb를 지원하고,planetscale은 mysql을 지원하기 때문에 나는 mysql을 사용 할 예정이다.
+
+어떤 provider를 사용할지는 `/prisma/schema.prisma`에서 설정해줄 수 있다.
+
+```javascript
+// prisma/schema.prisma
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+```
+
+### ✅ 3. 당신의 database schema를 Prisma shema에 연결하기 위해 `prisma db pull`을 실행해주세요
+
+### ✅ 4. Prisma Client 생성을 위해 `prisma generate`를 실행해주세요

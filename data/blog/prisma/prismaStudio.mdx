@@ -1,0 +1,102 @@
+---
+title: Prisma studio & client 활용하기
+date: '2023-02-28'
+tags: ['prisma', 'nextjs']
+draft: false
+---
+
+[Prisma database push 하기](https://june-dev.vercel.app/blog/prisma/prismaPushDatabase)
+
+위 게시물에 이어서 db를 push한 이후 Prisma Studio와 Prisma Client를 활용하는 것을 해보려 한다.
+Prisma Studio는 GUI 환경에서 손쉽게 데이터베이스를 관리할 수 있는 관리자 화면이다.
+
+## Prisma Studio
+
+아래 명령어를 입력하면 바로 Prisma Studio 페이지가 열리게 된다.
+
+```bash
+ npx prisma studio
+```
+
+![image](https://user-images.githubusercontent.com/72537762/221848933-daf5393d-642f-4eab-8d0a-360b465e7b9a.png)
+
+위와 같은 화면을 볼 수 있는데, 딱 봐도 직관적이고 사용하기 쉽게 되어있다. 원하는대로 샘플 데이터를 추가, 삭제, 수정이 가능하다. 이 Prisma Studio는 `schema.prisma`의 파일을 읽고 해당하는 데이터베이스의 패널을 보여주는 것이다.
+
+## Prisma Client
+
+Prisma Client는 데이터에 맞춤화된 쿼리 빌더다. Prisma Client를 설정하려면 우선 `schema.prisma` 파일에 하나이상의 모델이 꼭 필요하다. 왜냐하면 이 파일을 기반으로 만들어지기 때문이다.
+
+그 다음 아래 명령어로 Prisma Client를 설치한다.
+
+```bash
+npm install @prisma/client
+```
+
+그리고 다음 명령어로 Prisma Client를 생성해준다.
+
+```bash
+prisma generate
+```
+
+위 명령어를 실행하면 `node_modules/prisma/client`에 파일이 생성되는데, 이 파일은 `schema.prisma`파일을 기반을 만들어진다. 그리고 정말 편하고 좋은 점은 type 파일을 자동으로 만들어준다는 것이다. 예를 들어서 `schema.prisma`에 아래와 같은 모델 코드가 있다고 해보자.
+
+```javascript
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+  avatar    String?
+  phone     Int?     @unique
+  email     String?  @unique
+}
+```
+
+그럼 위 모델에 해당하는 타입을 자동으로 아래와 같이 생성해준다
+
+**./node_modules/@prisma/client/index.d.ts**
+
+```typescript
+export type User = {
+  id: number
+  createdAt: Date
+  updatedAt: Date
+  name: string
+  avatar: string | null
+  phone: number | null
+  email: string | null
+}
+```
+
+그리고 이제 실제로 데이터를 관래할 client 파일을 하나 만들어서 아래와 같은 코드를 작성해준다.
+
+**libs/clinet.ts**
+
+```javascript
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
+```
+
+이렇게 생성한 prisma client 인스턴스로 데이터를 생성하고 삭제하는 것이 가능해진다.
+아래코드는 `schema.prisma`에서 생성해놓은 `User` 모델의 데이터베이스를 추가 하고 가져오는 코드다.
+
+```javascript
+// run inside `async` function
+const newUser = await prisma.user.create({
+  data: {
+    name: 'Alice',
+    email: 'alice@prisma.io',
+  },
+})
+
+const users = await prisma.user.findMany()
+```
+
+이렇게 변경하고 `prisma generate`를 하면 Prisma client를 다시 생성하여 디렉터리에서 생성된 코드를 업데이트 해준다.
+
+[Prisma Studio](https://www.prisma.io/studio)
+
+[Prisma Client](https://www.prisma.io/docs/concepts/components/prisma-client)
+
+[Prisma Client 생성](https://www.prisma.io/docs/concepts/components/prisma-client/working-with-prismaclient/generating-prisma-client#the-prismaclient-npm-package)

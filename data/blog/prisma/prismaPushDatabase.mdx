@@ -1,0 +1,105 @@
+---
+title: prisma database push 하기
+date: '2023-02-28'
+tags: ['prisma', 'nextjs']
+draft: false
+---
+
+Prisma에서 사용할 database로 PlanetScale을 선택했고, 샘플 데이터베이스를 만들어주었다.
+그런데 이 PlanetScale은 데이터베이스가 어떤 다른 모델을 참조하는 경우 해당 모델과의 관계를
+이어주지 않는다. 이런 부분을 Prisma의 schema에서 처리해줄 수 있다.
+
+예를들어서 게시글과 해당 게시글을 작성한 유저간의 관계를 정의해주어야 한다. (작성한 유저가 실존하는 지, 맞는지 등)
+즉, 해당 게시글을 작성한 사람이 어떠한 유저라고 관계를 알려주는 것을 Prisma에서 해준다는 것이다.
+
+## Prisma에서 레코드 간의 관계를 지정해주는 방법
+
+Prisma에서 레코드 간의 관계를 지정해주는 방법에는 두가지가 있다.
+첫번째는 외래 키(foreignKeys)를 사용하는 것이다.
+
+### 외래 키(foreignKeys)로 관계모드 사용하기
+
+외래키는 참고하려는 다른 테이블의 기본 키(테이블에서 유일한 값)를 기반으로 값을 갖는 한 테이블의 열 또는 열 그룹니다.
+외래 키를 사용하면 다음의 효과가 있다.
+
+- 참조를 손상시키는 변경을 방지하는 제약 조건 설정
+- 레코드에 대한 변경 사항을 처리하는 방법을 정의 하는 참조 작업 설정
+
+#### PostgreSQL 커넥터를 사용하는 경우
+
+```MySQL
+CREATE TABLE "Post" (
+    "id" SERIAL NOT NULL,
+    "title" TEXT NOT NULL,
+    "authorId" INTEGER NOT NULL,
+
+    CONSTRAINT "Post_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "User" (
+    "id" SERIAL NOT NULL,
+
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- AddForeignKey
+ALTER TABLE "Post"
+  ADD CONSTRAINT "Post_authorId_fkey"
+  FOREIGN KEY ("authorId")
+  REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+```
+
+위 코드는 [Prisma의 공식문서](https://www.prisma.io/docs/concepts/components/prisma-schema/relations/relation-mode)에서 가져온 예제이다. PostgreSQL을 사용 할 경우의 예제인데 하나씩 살펴보자.
+
+우선 `Post`라는 테이블을 만들었고 id, title, authorId 데이터를 담고 있다. 그리고 `User`라는 테이블을 만들어서 User 테이블에서는 id 값만 가지고 있다. 그리고 `Post`와 `User` 모델간의 관계모드를 사용하기 위해 `Post` 테이블의 `authorId` 값을 외래키로 사용하고, `User`의 id값을 참조한다.
+
+이제 사용자를 업데이트하거나 삭제하는 경우 해당하는 모든 Post 데이터도 삭제되거나 업데이트 되게 된다.
+이렇게 할 수 있는 이유는 아래의 구문이 있기때문!
+
+```
+ ON DELETE CASCADE ON UPDATE CASCADE
+```
+
+### relationMode로 관계모드 설정하기
+
+그런데 나는 데이터베이스로 PlanetScale을 선택했다. 위와 같이 외래키를 사용하는 것은 `MongoDB` 또는 `PlanetScale`과 같은 일부 데이터베이스에서는 지원해주지 않는다고 한다.
+
+따라서 Prisma에서는 이런 경우를 위해 일부 속성을 애뮬레이트(한 시스템에서 다른 시스템을 복제하는 것)하는 관계 모드를 지원해준다. 관계 모드가 활성화된 상태에서 Prisma Client를 사용하면 Prisma 엔진에 의해 참조작업 및 일부 제약조건이 처리된다. 즉 Prisma에 의해 참조 무결성을 보장 할 수가 있다.
+
+> 참조무결성(referential integrity): 관계형 데이터베이스 관계 모델에서 2개의 관련 있던 테이블 간의 일관성, 데이터무결성을 발한다.
+
+#### 관계모드 설정하기
+
+관계모드를 설정하는 것은 외래키를 사용하는 것보다 훨씬 간단하다.
+`schema.prisma`파일의 datasource에 `relationMode` 필드를 추가해주면 된다.
+
+**schema.prisma**
+
+```sql
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+```
+
+그리고 `db push`를 해주면 PlanetScale에 생성한 db와 연결되고, prisma client를 사용할 수 있게 된다. 그전에! 중요한 점은 PlanetScale의 db 서버를 열어주어야 한다.
+
+아래 명령어로 원하는 db 서버를 열어주고 해당하는 db를 밀어넣어주면 된다.
+이렇게 해주면 Prisma 스키마를 데이터베이스의 스키마와 동기화 해서
+스키마 프로토타이핑을 가능하게 해준다.
+
+```bash
+pscale connect <database name>
+```
+
+```bash
+npx prisma db push
+```
+
+[Prisma 관계모드 설정](https://www.prisma.io/docs/concepts/components/prisma-schema/relations/relation-mode)
+
+[Prisma와 PlanetScale](https://www.prisma.io/docs/guides/database/using-prisma-with-planetscale#differences-to-consider)
+
+[데이터베이스 참조무결성](https://ko.wikipedia.org/wiki/%EC%B0%B8%EC%A1%B0_%EB%AC%B4%EA%B2%B0%EC%84%B1)

@@ -1,0 +1,164 @@
+---
+title: Javascript - 호출스택과 이벤트 루프 예시 분석
+date: '2023-03-22'
+tags: ['Javascript']
+draft: false
+---
+
+자바스크립트 동작원리 & 동기비동기 ➡️ [Javascript 동작 원리](https://june-dev.vercel.app/blog/javascript/async)
+
+이전에 작성했던 Javascript의 비동기 관련 글에 이어서 실제로 아래 코드가 동작하는 순서를 고민해보며 다시한번 Javascript의 함수 호출 스택과 이베트 루프에 대해서 이해 해보려 한다.
+
+```javascript
+function test1() {
+  console.log('test1')
+}
+function test2() {
+  console.log('first')
+  setTimeout(() => {
+    console.log('wow')
+  }, 0)
+  new Promise((resolve) => {
+    resolve('hi')
+  }).then(console.log)
+  test1()
+}
+setTimeout(test2, 5000)
+```
+
+많은 글에서 그림으로 설명을 하는데, 텍스트로만 정리해보려 한다.
+
+(절대 그림 그리기 귀찮아서 아님🥲 )
+
+### 1단계
+
+먼저 Javascript가 실행되면서 `Anonymouse`라는 전역 실행 컨텍스트가 자동으로 콜스택에 들어간다. 전역 실행 컨텍스트는 Javascript의 전역 함수에 대한 컨텍스트 이므로 Javascript가 실행되었을 때 기본적으로 Call Stack에 가장 먼저 쌓이게 된다.
+
+```javascript
+call stack = [anonymouse]
+background = []
+task queue = []
+```
+
+### 2단계
+
+그리고 위 코드에서는 실제로 직접 호출된 함수는 setTimout 함수 하나 뿐이니 call stack에는 setTimeout 함수 하나가 쌓인다.
+
+```javascript
+call stack = [anonymouse, setTimeout(test2,5000)]
+background = []
+task queue = []
+```
+
+### 3단계
+
+setTimeout 함수가 실행되면, call stack에서 setTimeout 함수가 pop 되고, 모든 함수가 실행되었으므로 anonymouse도 pop 된다. 그리고 setTimeout 함수의 call back 함수가 background로 이동해서 타이머 5초를 실행시킨다.
+
+```javascript
+call stack = []
+background = [timer(test2,5000)]
+task queue = []
+```
+
+### 4단계
+
+타이머 5초가 끝나면 test2 함수는 `task queue` 에 들어간다.
+
+```javascript
+call stack = []
+background = []
+task queue = [test2]
+```
+
+### 5단계
+
+`이벤트루프`는 현재 call stack이 비어있는 것을 확인하고, task queue에서 대기하던 test2 함수를 꺼내서 call stack에 추가한다.
+
+```javascript
+call stack = [test2]
+background = []
+task queue = []
+```
+
+### 6단계
+
+`test2`함수가 실행되면 아래와 같이 call stack이 쌓이게 된다.
+
+```javascript
+call stack = [test2, test1, new Promise(), setTimeout(() =>console.log('wow'),0), console.log('first')]
+background = []
+task queue = []
+```
+
+### 7단계
+
+call stack 순서대로 함수가 호출되고 stack에서 pop이 되는 과정은 아래와 같다.
+
+- console.log('first') 호출 => pop
+- setTimeout 호출 => pop => background로 callback 함수 이동하여 타이머 시작
+- new Promise() => pop =>내부 콜백 함수 호출 후 then함수 background로 이동
+- test1() 함수 호출 => console.log('test1') 호출 => pop
+- 모든 함수가 호출되었으니 test2 함수 pop
+
+위 과정을 거치고 나면 아래와 같은 형태가 된다.
+
+```javascript
+call stack = []
+background = [timer(console.log('wow'),0), Promise then 함수]
+task queue = []
+```
+
+여기까지 콘솔에 출력된 모양은 아래와 같다.
+
+```bash
+first
+test1
+```
+
+✅ 여기서 체크포인트는 `Promise`는 then을 만나는 순간 비동기로 동작하여 background로 실행이 옮겨진다는 것이다.
+
+### 8단계
+
+타이머 0초가 지났으면 setTimeout의 콜백함수가 task queue로 이동하고 then 함수도 task queue로 이동한다. 그런데 여기서 then이 setTimeout의 콜백함수를 앞서 나간다. Promise로 약속된 것을 이행해야 한다면서 새치기를 해버리는 것이다.
+
+✅ 여기서 다시 체크포인트! Promise는 일반 함수들보다 우선순위를 갖게 된다.
+
+```javascript
+call stack = []
+background = []
+task queue = [then(console.log),console.log('wow')]
+```
+
+### 9단계
+
+이벤트 루프는 call stack이 비어있는 것을 확인하고 차례대로 task queue의 함수들을 하나씩 넣어서 실행시켜준다.
+
+```javascript
+call stack = [then(console.log))]
+background = []
+task queue = [console.log('wow')]
+```
+
+```javascript
+call stack = [console.log('wow')]
+background = []
+task queue = []
+```
+
+그럼 이제 console에는 아래와 같이 출력된다.
+
+```bash
+// 5초 후
+first
+test1
+hi
+wow
+```
+
+Javascript의 호출 스택 그리고 이벤트 루프에 대해 여러번 강의를 듣고 정리했었지만, Promise를 만났을때 호출이 어떻게 되는지에 대해서는 생각해보지 못했던 것 같다.
+
+그래서 한번 더 머릿속에서 정리하고 시뮬레이션을 해보기 위해 예시를 통해 정리해보았고 결과적으로 아래 두가지 사항을 추가로 알 수 있었다.
+
+✅ `Promise`는 then을 만나는 순간 비동기로 동작하여 background로 실행이 옮겨진다는 것이다.
+
+✅ `Promise`는 일반 함수들보다 우선순위를 갖게 된다.

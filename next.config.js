@@ -8,8 +8,8 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 const ContentSecurityPolicy = `
   default-src 'self' ;
   script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com/;
-  style-src 'self' 'unsafe-inline';
-  img-src * blob: data:;
+  style-src 'self' 'unsafe-inline' giscus.app;
+    img-src * blob: data:;
   media-src 'none';
   connect-src *;
   font-src 'self';
@@ -65,14 +65,14 @@ module.exports = () => {
     eslint: {
       dirs: ['pages', 'components', 'lib', 'layouts', 'scripts'],
     },
-    async headers() {
-      return [
-        {
-          source: '/(.*)',
-          headers: securityHeaders,
-        },
-      ]
-    },
+    //async headers() {
+    //  return [
+    //    {
+    //      source: '/(.*)',
+    //      headers: securityHeaders,
+    //    },
+    //  ]
+    //},
     webpack: (config, options) => {
       config.module.rules.push({
         test: /\.svg$/,

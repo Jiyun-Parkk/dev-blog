@@ -9,7 +9,7 @@ const siteMetadata = {
   language: 'en',
   theme: 'system', // system, dark or light
   siteUrl: 'https://www.junedevblog.com/',
-  siteRepo: 'https://github.com/Jiyun1937',
+  siteRepo: 'https://github.com/Jiyun1937/dev-blog',
   siteLogo: 'logoDark.png',
   image: '/static/images/profile.png',
   socialBanner: '/static/images/thumb.jpeg',

@@ -8,18 +8,18 @@ const siteMetadata = {
   description: '웹 프론트 개발 블로그 입니다',
   language: 'en',
   theme: 'system', // system, dark or light
-  siteUrl: 'https://june-dev.vercel.app/',
+  siteUrl: 'https://www.junedevblog.com/',
   siteRepo: 'https://github.com/timlrx/tailwind-nextjs-starter-blog',
   siteLogo: 'logoDark.png',
   image: '/static/images/profile.png',
   socialBanner: '/static/images/thumb.jpeg',
   email: 'jiyun1937@naver.com',
-  github: 'https://github.com/jiyun-par',
+  github: 'https://github.com/Jiyun1937',
   twitter: 'https://twitter.com/Twitter',
   facebook: 'https://facebook.com',
   youtube: 'https://youtube.com',
   linkedin: 'https://www.linkedin.com',
-  locale: 'en-US',
+  locale: 'ko-KR',
   analytics: {
     // If you want to use an analytics provider you have to add it to the
     // content security policy in the `next.config.js` file.

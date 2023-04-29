@@ -28,11 +28,6 @@ class MyDocument extends Document {
           <meta name="keyword" content="프론트엔드 개발 블로그" />
           <meta http-equiv="Title" content="June Dev blog" />
           <meta name="subject" content="웹 프론트 개발 기술 블로그" />
-          <script
-            async
-            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5610907263411318"
-            crossOrigin="anonymous"
-          ></script>
           <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
         </Head>
         <body className="bg-white text-black antialiased dark:bg-gray-900 dark:text-white">

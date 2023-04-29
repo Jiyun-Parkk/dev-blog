@@ -1,0 +1,105 @@
+---
+title: Java switch 구문
+date: '2023-04-29'
+tags: ['java']
+draft: false
+---
+
+Javascript에서의 switch 구문은 조건값에 `boolean`을 사용할 수 있다. 아래 예시 코드와 같이 `true`를 조건값으로 넣어주면 case가 true 일 경우 해당 하는 코드를 실행해준다. 개인적으로 switch문을 좋아해서(특별한 이유는 없고 그냥 좋아함..ㅎㅎ) 조건값에 boolean을 넣어 자주 사용했었다.
+
+```Javascript
+switch(true) {
+      case score >= 95:
+        return "A+";
+        break;
+      case score >= 90 && score < 95:
+        return "A0";
+        break;
+      case score >= 80 && score < 90:
+        return "B+";
+        break;
+      case score >= 70 && score < 80:
+        return "B0";
+          break;
+      default:
+        return "C+";
+    }
+
+```
+
+즐겨 사용하던 방법이라 java 예제를 풀면서도 동일하게 사용해보려 했는데 계속 에러가 발생했다.
+
+```java
+public class ProgrammingGrades {
+  public static void main(String[] args) {
+    // 변수 생성
+    int score1 = 96;
+    int score2 = 85;
+    int score3 = 76;
+    // 결과 출력
+    System.out.printf("%d점 -> %s\n", score1, grade(score1));
+    System.out.printf("%d점 -> %s\n", score2, grade(score2));
+    System.out.printf("%d점 -> %s\n", score3, grade(score3));
+  }
+
+  public static String grade(int score) {
+    /* 메소드를 완성하시오. */
+
+    switch(true) {
+      case score >= 95:
+        return "A+";
+        break;
+      case score >= 90 && score < 95:
+        return "A0";
+        break;
+      case score >= 80 && score < 90:
+        return "B+";
+        break;
+      case score >= 70 && score < 80:
+        return "B0";
+          break;
+      default:
+        return "C+";
+    }
+
+  }
+}
+```
+
+```bash
+/root/var/tmp/2023_04_29_08_06_09_2484405f/ProgrammingGrades.java:27: error: incompatible types: boolean cannot be converted to int
+    switch(true) {
+```
+
+`boolean cannot be converted to int`
+
+boolean은 int로 형변환이 안된단다. 이렇게 에러가 나고서야 java에서의 switch 구문 사용법을 찾아본.. ㅎㅎ
+
+<img
+  width="493"
+  alt="image"
+  src="https://user-images.githubusercontent.com/72537762/235306560-52291f53-f986-483c-a8f1-7a956ecd4a41.png"
+/>
+[!출처-Java Document](https://docs.oracle.com/javase/tutorial/java/nutsandbolts/switch.html)
+
+---
+
+**switch 구문에서 조건문으로 들어갈 수 있는 타입은 primitive data인 byte, short, char, int 뿐이라 한다. boolean은 안된다는 뜻. 따라서 모든 switch 문을 if문으로 변경할 수 는 있지만 모든 if문을 switch 문으로 변경할 수는 없다.**
+
+---
+
+아래와 같이 변경하니 아주 잘 실행되었다. 🙀
+
+```java
+	if(score >= 95){
+	  return "A+";
+	} else if(score >= 90 && score < 95) {
+	  return"A0";
+	} else if(score >= 80 && score < 90) {
+	    return"B+";
+	} else if(score >= 70 && score < 80) {
+	  return "B0";
+	} else {
+	  return "C+";
+	}
+```

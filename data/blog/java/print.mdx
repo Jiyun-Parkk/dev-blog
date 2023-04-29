@@ -1,0 +1,69 @@
+---
+title: Java - 출력하기
+date: '2023-04-29'
+tags: ['java']
+draft: false
+---
+
+## System.out
+
+java에서는 System이라는 입출력 클래스를 사용하는데, 아래와 같은 변수들이 정의 되어 있다.
+
+- System.in : 입력
+- System.out : 출력
+- System.err : 에러
+
+## print()
+
+줄바꿈 없이 출력
+
+```java
+System.out.print("a");
+System.out.print("b");
+System.out.print("c");
+
+// abc
+```
+
+## println()
+
+줄바꿈하여 출력
+
+<small>처음 사용할때 l을 i로 보고 2시간동안 헤맨건 안비밀..ㅎㅎ</small>
+
+```java
+System.out.println("a");
+System.out.println("b");
+System.out.println("c");
+
+// a
+// b
+// c
+```
+
+## printf()
+
+원하는대로 형식대로 출력
+
+println을 사용하면 변수의 값을 그대로 출력하는 기능 밖에 안된다. 하지만 변수의 다양한 형태를 테스트 해보고 싶을때가 있는데, 그럴때 사용하는 것이 printf다.
+
+```java
+String str = "jiyun";
+int num = 22;
+
+System.out.printf("%s은 %d살이 되고 싶다", str, num);
+
+// jiyun은 22살이 되고 싶다
+```
+
+printf는 줄바꿈이 되지 않기 때문에 줄 바꿈을 할때는 `%n` 혹은 `\n`을 사용하면 된다.
+
+> OS마다 줄바꿈 문자가 다를 수 있기 때문에 `%n`을 사용하는 것이 안전!
+
+| 지시자 | 설명                                                                                |
+| ------ | ----------------------------------------------------------------------------------- |
+| %d     | 10진 정수                                                                           |
+| %x     | 16진 정수                                                                           |
+| %f     | 부동소수점 형식 (%10.3f => 전체 10자리중 소수점 3자리 남는 공간은 공백으로 채운다)  |
+| %c     | 문자 출력                                                                           |
+| %s     | 문자열 출력(%20s => 20만큼의 출력 공간 확보, 남는자리는 공백, 마이너스는 왼쪽 정렬) |

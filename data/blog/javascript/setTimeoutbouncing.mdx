@@ -12,12 +12,12 @@ papago 번역 api를 가져와 번역해주는 기능을 구현해보았다. 입
 > debounce는 사용자가 아무리 무한 동작을 하여도 단 한번의 처리만 가능하게 하는 것을 의미한다. 사용자가 원하는 값은 한개인데, 이런 처리가 없다면 무한히 원하지도 않는 결과 값을 추출하기 때문이다.
 
 ## setTimeout은...
-setTimeout을 debounce 처리 하기 전에~ 알아야 할 것은, setTimeout이 Web API라는 사실을 알아야 한다. 다시말해, setTimeout은 Javascript 엔진에서 동작하는 것이 아니라, Web API로 background에서 비동기로 실행된다.
+setTimeout을 debounce 처리 하기 전에 알아야 할 것은, setTimeout이 Web API라는 사실이다. 따라서 setTimeout은 Javascript 엔진에서 동작하는 것이 아니라, Web API로 background에서 비동기로 실행된다.
 
-따라서 자바스크립트 코드가 실행되고 있을 동안, setTimout은 background에서 타이머 시간을 준 만큼 타이머가 동작한다. 타이머가 완료 된 후에는 setTimout의 콜백 함수가 콜백 큐로 들어가게 된다. 그리고 콜스택의 모든 실행문들이 완료된 후에, 그때 setTimout의 콜백함수가 call stack에 들어가서 실행된다.
+자바스크립트 코드가 실행되고 있을 동안, setTimout은 background에서 타이머 시간을 준 만큼 타이머가 동작한다. 타이머가 완료 된 후에는 setTimout의 콜백 함수가 콜백 큐로 들어가게 된다. 그리고 call stack의 모든 실행문들이 완료되고 call stack이 비워지면, setTimout의 콜백함수가 call stack에 들어가서 실행된다.
 
 ## input event 내부의 setTimeout
-아래 코드에서 실행 순서를 정리하며 아래와 같다.
+아래 코드에서 실행 순서를 정리하면 아래와 같다.
 
 1. 사용자가 input에 텍스트를 입력
 2. input 이벤트가 일어날때마다 debounce 전역변수에 setTimeout Id 할당 & setTimeout 실행

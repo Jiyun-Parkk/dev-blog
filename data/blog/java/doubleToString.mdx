@@ -1,0 +1,55 @@
+---
+title: Double형 데이터의 지수표현 변환하기
+date: '2023-05-01'
+tags: ['java']
+draft: false
+---
+
+예금 복리를 계산하는 예제에서 double 타입을 사용하여 구했는데, 아래와 같은 결과 값이 나왔다.
+
+```bash
+1.1592740743E7
+```
+
+내가 원하는 값은 `11592740.743...`인데 영어 표기법이 섞여 나와서 16진수로 표기가 된 줄 알았다. 그런데 이건 16진수로 표기 된 것이 아니라, double의 데이터가 커지만 지수 표기법으로 표기 되어서 그렇다고 한다.
+
+지수 표기법은 아주 큰 숫자를 표현하기 위해서 사용하는데 ,E(Exponent)로 표기한다. E는 10을 의미한다. E 뒤에 붙는 숫자는 10의 승수를 나타낸다.
+
+따라서 위 결과값을 다시 표기해보면 아래와 같다.
+
+```bash
+1.1592740743 * 10^7 = 11592740.743
+```
+
+이것을 보기 편하게 원하는 대로 표기하는 방법은 두가지가 있는데, NumberFormat의 setGroupingUsed 속성을 이용하거나 BigDecimal을 이용 하면 된다.
+
+```java
+import java.text.NumberFormat;
+import java.math.BigDecimal;
+
+public class Money {
+  public static void main(String[] args) {
+    // 변수 생성
+    int a = 10000000;
+    double r = 0.03;
+    int end = 5;
+    // 계산
+    double s = (a * Math.pow(1 + r, end));
+    // 출력
+    NumberFormat f = NumberFormat.getInstance();
+    f.setGroupingUsed(false);
+    System.out.println(f.format(s));
+    // 11592740.743
+
+    System.out.println(f.format(s));
+    BigDecimal bigDemical = new BigDecimal(s);
+    System.out.println(bitDemical.toString());
+    // 11592740.7430000007152557373046875
+  }
+}
+```
+
+BigDecimal이 NumberFormat 보다 정확한 값을 출력 해내는데 만약 정밀한 데이터가 꼭 필요한 경우에는 BigDecimal으로 변환하는 것이 좋을 것 같다.
+
+
+[!참고](https://m.blog.naver.com/PostView.naver?blogId=windboy83&logNo=220684213153&proxyReferer=)

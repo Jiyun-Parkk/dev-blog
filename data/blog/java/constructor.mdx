@@ -1,0 +1,65 @@
+---
+title: Java 클래스 생성자
+date: '2023-05-02'
+tags: ['java']
+draft: false
+---
+
+## 생성자
+
+클래스를 생성하고 나서 멤버변수를 하나씩 값을 초기화 해줘도 되지만, 생성자 함수를 사용하면 생성하는 동시에 매개변수로 값을 초기화 해줄수 있다. 생성자를 만드는 법은 클래스 이름과 동일한 이름으로 메서드 형태로 만들어 주면 된다.
+
+```java
+package Constructor;
+
+public class Constructor {
+  public static void main(String[] args) {
+    Person jiyun = new Person("Jiyun",31);
+    jiyun.eat();
+  }
+
+}
+
+class Person {
+  String name;
+  int age;
+  Person(String name, int age) {
+    this.name = name;
+    this.age = age;
+  }
+
+  void eat() {
+    String format = String.format("%s은 사과를 먹어요",name);
+    System.out.println(format);
+  }
+}
+
+```
+
+생성자와 일반 메서드의 차이점은 두가지가 있다.
+
+| 생성자                         | 일반 메서드                  |
+| ------------------------------ | ---------------------------- |
+| 이름이 클래스이름과 동일해야함 | 이름이 클래스이름과 달라야함 |
+| 멤버변수의 초기화 역할을 담당  | 다양한 기능을 만들 수 있음   |
+
+## 생성자를 사용하는 이유
+
+생성자는 자바 창시자가 생성자로 변수를 초기화 시키고, 메서드는 오로지 기능만 담당하도록 하고자 만들게 되었다고 한다. 그런데 굳이 생성자 메서드를 만들지 않아도 그다지 문제 없이 사용할 수 있다.
+
+그 이유는 생성자가 없을 경우 컴파일러에 의해 자동으로 default 생성자가 만들어지기 떄문이다. default 생성자는 빈 매개변수, 빈 괄호로 만들어지게 된다.
+
+## 생성자 안에서 사용하는 this
+
+생성자의 매개변수의 이름은 기존 멤버변수의 이름과 다르게 한다면 상관없지만, 만약 동일한 이름으로 했을 경우에는 해당 객체의 멤버변수를 가르키는 것이 필요하다.
+
+아래 코드와 같이 생성자의 매개변수와 객체의 맴버변수의 이름이 같을 때 `this`로 객체의 멤버변수를 가르킬 수 있다.
+
+```java
+  String name;
+  int age;
+  Person(String name, int age) {
+    this.name = name;
+    this.age = age;
+  }
+```

@@ -1,0 +1,170 @@
+---
+title: Java static과 인스턴스
+date: '2023-05-05'
+tags: ['java']
+draft: false
+---
+
+## static 키워드
+
+static에 대해 이해하려면 운영체제가 메모리 관리를 어떻게 하고 있는지에 대해 이해하고 있어야 한다.
+
+> 참고 : [메모리 구조](https://www.junedevblog.com/blog/cs/os/memory)
+
+<center>
+  <img
+    width="578"
+    alt="image"
+    src="https://user-images.githubusercontent.com/72537762/236367213-057bf966-5148-4876-a6b7-c0484b3e2b67.png"
+  />
+  <figcaption></figcaption>
+</center>
+
+static 한 것이나, 전역변수는 데이터 영역에 할당이 된다. Java에서는 `static 변수`, `static 메서드`, `
+클래스` 들이 해당 영역에 할당되어 있고, 프로그램이 종료되기 전까지 사용할 수 있다.
+
+따라서 이 영역은 `공유한다`라는 개념을 가지고 있다. 모든 객체가 함께 공유하여 사용할 수 있다는 장점이 있지만, 한편으로는 Java의 Garbage Collector 관리 영역 밖에 존재하기 때문에 메모리 관리가 안된다는 단점 있다. 따라서 Static을 자주 사용하면 프로그램 종료시 까지 계속 메모리가 할당된 채 존재하므로 시스템 퍼포먼스에 악영향을 미칠 수 있다고 한다.
+
+## static이 있는것과 없는 것의 차이
+
+Class를 만들면 정적 메모리 영역에 올라가면서 자동적으로 static이 붙은 요소들도 생성이 된다. 그리고 new 연산자로 객체를 생성하게 되면, 하나의 인스턴스가 만들어진다. 이때 static 영역에 있던 클래스가 new 연산자를 통해 객체가 되면서 heap영역에 들어가게 된다. 개발자의 의도에 따라 만들어진 객체는 다양한 크기를 가질 수 있기 때문에 동적 영역인 heap에 할당되고, 이 heap영역은 static 영역과 달리 Garbage Collector가 메모리 관리를 하게 된다.
+
+static한 변수, 메서드는 정적영역에 있는 클래스로부터, static 하지 않은 변수, 메서드는 주체 인스턴스(객체)로부터 사용할 수 있으므로 각각을 `클래스 변수, 클래스 메서드`, `인스턴스 변수, 인스턴스 메서드`라고 한다.
+
+## 클래스 메서드,변수 vs 인스턴스 변수, 메서드
+
+static메서드의 예로 Java의 Math 클래스는 따로 객체를 생성하지 않아도 Math 클래스의 메서드를 사용할 수 있다. 이를 `클래스 메서드`라고 한다.
+
+```java
+// new Math를 하지 않아도 사용가능
+Math.pow(2,2);
+```
+
+반면 일반적으로 만들어진 Class의 경우 객체를 생성하고 메서드를 사용할 수 있다. 이것을 `인스턴스 메서드`라고 한다.
+
+```java
+public class Main {
+  public static void main(String[] args) {
+    Test test = new Test(); // 객체를 생성해야
+    String name = test.getName(); // 메서드를 사용할 수 있다는
+    System.out.println(name);
+  }
+}
+
+class Test {
+	private String name = "jiyun";
+	String getName() {
+		return this.name;
+	}
+}
+```
+
+직접 static 요소를 만들려면 static 키워드를 붙여주기만 하면 된다.
+
+```java
+public class Main {
+  public static void main(String[] args) {
+    Test test = new Test(); // 주체 객체를 생성해야
+    String name = test.getName(); // 메서드를 사용할 수 있다
+    System.out.println(name);
+
+	// 클래스에서 바로 불러오기 가능하기
+	System.out.println(Test.age);
+	Test.printAge();
+
+  }
+}
+
+class Test {
+	private String name = "jiyun";
+	static int age = 0;
+	static void printAge() {
+		System.out.println("바보");
+	}
+	String getName() {
+		return this.name;
+	}
+}
+```
+
+## static을 사용해서 정의해야 하는 경우
+
+클래스는 데이터와 이 데이터에 관련된 메서드의 집합이므로 같은 클래스 내에 있는 메서드와 멤버변수는 밀접한 관계가 있다. 인스턴스 메서드는 인스턴스 변수와 관련된 작업을 하는, 메서드의 작업을 수행하는데 인스턴스 변수를 필요로 하는 메서드이다.
+
+반면에 인스턴스의 변수나 메서드를 사용하지 않는 메서드를 클래스 메서드나 변수로 정의하는 것이다.
+
+> 멤버변수: 클래스 영역에 선언된 변수. 멤버변수 중에 static이 붙지 않은 것이 클래스변수, 붙은 것이 인스턴스 변수이다.
+
+### 1. 클래스를 설계할 때, 멤버변수 중 모든 인스턴스에 공통으로 사용하는 것에 static을 붙인다.
+
+생성된 인스턴스들은 서로 독립적이기 때문에, 각 인스턴스의 변수는 서로 다른 값을 유지 한다. 하지만 모든 인스턴스에서 같은 값이 유지되어야 하는 변수는 static을 붙여서 클래스 변수로 정의한다.
+
+예를 들어서 생성된 클래스의 총 합을 구하고 싶다면 아래와 같이 구현해볼 수 있다.
+
+```java
+
+public class Main {
+
+  public static void main(String[] args) {
+    Test test = new Test("국어"); // count 1
+    Test test1 = new Test("수학");// count 2
+    Test test2 = new Test("영어");// count 3
+    Test test3 = new Test("과학");// count 4
+    Test test4 = new Test("사회");// count 5
+
+	System.out.println(Test.count);
+  }
+
+}
+
+
+class Test {
+  static int count = 0;
+  String testName;
+
+  Test(String name) {
+    count += 1; // 객체 생성시 count를 계속 올려줌
+    this.testName = name;
+  }
+}
+
+```
+
+### 2. 메서드 내에서 인스턴스 변수를 사용하지 않는다면, static을 붙이는 것을 고려한다.
+
+만약 메서드 작업내용 중에 인스턴스 변수를 필요로 하지 않는다면, static을 붙여 사용하자. 인스턴스 메서드는 실행시 호출되어야 할 메서드를 찾는 과정이 추가적으로 필요하지만, 클래스 메서드는 이미 메모리 공간에 올라와 있는 것을 가져다 쓰는 것이기 때문에 성능이 향상될 수 있다.
+
+## 클래스에서 this는 인스턴스를 참조하고 있다
+
+위에 첨부한 그림처럼 클래스와 객체는 다른 영역에 존재하고 있다. 다시말해서 정적인 클래스 변수와 클래스 메서드는 객체 외부에 존재하고 있다. 클래스를 생성할때 `this`를 사용하여 변수나 메소드를 가르키는데, 이것은 해당하는 변수나 메서드가 인스턴스의 멤버임을 명확하게 하기 위함이다.
+
+따라서 this는 클래스 변수나,메서드에는 사용할 수 없다.
+
+```java
+public class Main {
+  public static void main(String[] args) {
+	// 클래스에서 바로 불러오기 가능하기
+	System.out.println(Test.age);
+	Test.printAge();
+
+  }
+}
+
+class Test {
+	static int age = 0;
+	static void printAge() {
+		System.out.println(this.age); // 에러남
+		// age는 주체 객체가 필요없는 정적 데이터
+		// this가 가르킬수 있는 객체가 없다
+	}
+}
+```
+
+여기서 하나만 기억하면 된다. 아래 두가지만 기억해주면 된다.
+
+✅ 클래스멤버가 존재하는 시점 => 인스턴스 멤버가 존재하지 않을 수도 있음
+
+✅ 인스턴스 멤버가 존재하는 시점 => 클래스멤버는 항상 존재
+
+[참고-메모리영역-tcpschool](http://www.tcpschool.com/c/c_memory_structure)
+[참고-Java static](https://yang-droid.tistory.com/52)

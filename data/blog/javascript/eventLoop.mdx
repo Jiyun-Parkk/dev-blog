@@ -45,7 +45,7 @@ task queue = []
 그리고 위 코드에서는 실제로 직접 호출된 함수는 setTimout 함수 하나 뿐이니 call stack에는 setTimeout 함수 하나가 쌓인다.
 
 ```javascript
-call stack = [anonymouse, setTimeout(test2,5000)]
+call stack = [setTimeout(test2,5000), anonymouse]
 background = []
 task queue = []
 ```

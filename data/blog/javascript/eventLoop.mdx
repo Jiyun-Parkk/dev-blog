@@ -121,12 +121,13 @@ test1
 
 타이머 0초가 지났으면 setTimeout의 콜백함수가 task queue로 이동하고 then 함수도 task queue로 이동한다. 그런데 여기서 then이 setTimeout의 콜백함수를 앞서 나간다. Promise로 약속된 것을 이행해야 한다면서 새치기를 해버리는 것이다.
 
-✅ 여기서 다시 체크포인트! Promise는 일반 함수들보다 우선순위를 갖게 된다.
+✅ 여기서 다시 체크포인트! Promise는 일반 함수들보다 우선순위를 갖게 된다.(왜냐하면 말그대로 약속대로 이행하기 위함이기 때문에!) 따라서 task queue가 아닌 `micro task queue`라는 곳에 들어가게 된다. 말하자면 VIP 룸 같은 것이다.
 
 ```javascript
 call stack = []
 background = []
-task queue = [then(console.log),console.log('wow')]
+micro task queue = [then(console.log)]
+task queue = [console.log('wow')]
 ```
 
 ### 9단계
@@ -136,12 +137,14 @@ task queue = [then(console.log),console.log('wow')]
 ```javascript
 call stack = [then(console.log))]
 background = []
+micro task queue = []
 task queue = [console.log('wow')]
 ```
 
 ```javascript
 call stack = [console.log('wow')]
 background = []
+micro task queue = []
 task queue = []
 ```
 
@@ -161,4 +164,4 @@ Javascript의 호출 스택 그리고 이벤트 루프에 대해 여러번 강�
 
 ✅ `Promise`는 then을 만나는 순간 비동기로 동작하여 background로 실행이 옮겨진다는 것이다.
 
-✅ `Promise`는 일반 함수들보다 우선순위를 갖게 된다.
+✅ `Promise`는 일반 함수들보다 우선순위가 있어서 VIP석으로 이동해 대기한다.

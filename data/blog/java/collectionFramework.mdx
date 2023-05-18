@@ -1,0 +1,105 @@
+---
+title: Java Collection Framework
+date: '2023-05-17'
+tags: ['java']
+draft: false
+---
+
+## Collection Framework
+
+Collection Framework이란, 데이터를 저장하는 자료구조와 이를 처리하는 알고리즘을 저장하는 클래스들을 의미한다.
+
+✅ Collection: 다수의 데이터를 의미
+✅ Framework: 표준화된 프로그래밍 방식
+
+기존에 JDK1.2이전까지는 다수의 데이터를 저장하는 클래스들을 각자 다른 방식으로 처리해야 했지만, JDK1.2부터
+컬렉션 프레임워크가 등장하면서 다양한 컬렉션이 추가됐을 뿐 아니라 표준화 된 방식으로 다룰 수 있도록 설계되었다.
+
+> Vector와 같이 다수의 데이터를 저장할 수 있는 클래스를 컬렉션 클래스라고 한다
+
+## Collection Framework의 장점
+
+1. 다수의 데이터를 다루는데 필요한 여러가지 클래스를 제공하여 프로그래머의 짐을 덜어준다
+2. 인터페이스와 다형성을 이용한 객체지향적 설계로 표준화되어 있어서 사용법 익히기가 편리하다
+3. 재사용성이 높은 코드를 작성할 수 있다
+
+프레임워크는 단순히 기능뿐만 아니라 프로그래밍 방식을 정형화 하여 프로그램의 개발 생산성을 높이고 유지보수를 용이하게 한다. 컬렉션 프레임워크도 표준화를 통해 생산성 향상과 코드의 재사용성을 높이려고 했지만, 별다른 성과가 없었고 JDK1.8에서 `람다와 스트림`에 의해 비로소 표준화가 이루어졌다고 한다.
+
+## Collection Framework의 핵심 인터페이스
+
+컬렉션 프레임워크는 데이터의 그룹을 크게 3가지로 분류했다. `List`, `Set`, `Map`으로 3개의 인터페이스를 정의했는데, 여기서 `List`와 `Set`의 공통 부분을 뽑아 새로운 인터페이스인 `Collection`을 추가로 정의했다. List와 Set을 구현한 클래스들은 서로 많은 공통부분이 있지만, MAP 인터페이스는 전혀 다른 형태로 컬렉션(데이터)을 다루기 때문에 앞의 둘과는 독립적이다.
+
+<center>
+  <img
+    width="290"
+    alt="image"
+    src="https://github.com/Jiyun-Parkk/woorifisa-fe-tech-seminar/assets/72537762/4bb1e7a1-25a3-4604-afed-47ac8e17b9e8"
+  />
+</center>
+
+## List, Set, Map 특징 알아보기
+
+<center>
+  <img
+    width="647"
+    alt="image"
+    src="https://github.com/Jiyun-Parkk/woorifisa-fe-tech-seminar/assets/72537762/8911e558-2028-45b2-bacd-18d67dde6c89"
+  />
+</center>
+
+## Collection Interface
+
+컬렉션 인터페이스는 컬렉션 클래스에 저장된 데이터를 읽고, 추가하고 삭제하는 등의 기본적인 메서드들을 제공하고 있다.
+
+| 메서드                       | 설명                                            |
+| ---------------------------- | ----------------------------------------------- |
+| boolean add(Object o)        | 지정된 객체를 Collection에 추가                 |
+| boolean contains(Object o)   | 지정된 객체가 Collection 포함여부               |
+| boolean equals(Object o)     | 동일한 Collection 여부                          |
+| int hashCode()               | Collection의 hash code                          |
+| boolean isEmpty()            | Collection 비어있는지 여부                      |
+| boolean remove(Object o)     | 지정된 객체를 삭제                              |
+| int size()                   | Collection에 저장된 객체의 개수                 |
+| Object[] toArray()           | Collection에 저장된 객체를 객체배열로 반환      |
+| Object[] toArray(Object[] a) | 지정된 배열에 Collection의 객체를 저장해서 반환 |
+
+## List 인터페이스
+
+List 인터페이스는 중복을 허용하면서 저장순서가 유지되는 컬렉션을 구현하는데 사용한다.
+List에는 Vector, ArrayList, LinkedList 세가지 컬렉션을 가지고 있고, 이중에서 stack은 Vector에 포함된다.
+
+<center>
+  <img
+    width="305"
+    alt="image"
+    src="https://github.com/Jiyun-Parkk/woorifisa-fe-tech-seminar/assets/72537762/676e45de-3237-45ed-8fee-a2799545e00c"
+  />
+</center>
+
+## Set 인터페이스
+
+Set 인터페이스는 중복을 허용하지 않고, 저장순서가 유지되지 않는 컬렉션 클래스를 구현한다. Set 인터페이스를 구현한 클래스로는
+HasySet, TreeSet 등이 있다.
+
+<img
+  width="306"
+  alt="image"
+  src="https://github.com/Jiyun-Parkk/woorifisa-fe-tech-seminar/assets/72537762/aee49e40-7d8b-4472-9292-88d4baef2244"
+/>
+
+## Map 인터페이스
+
+Map 인터페이스는 key와 value값을 쌍으로 묶어서 저장하는 컬렉션 클래스를 구현한다. Map 인터페이스는 아래와 같은 특징이 있다.
+
+1. key 중복은 안되지만 value의 중복은 허용한다
+2. 기존의 중복된 키와 값을 저장하면 기존 값은 없어지고 마지막에 저장된 값이 남는다
+
+<img
+  width="302"
+  alt="image"
+  src="https://github.com/Jiyun-Parkk/woorifisa-fe-tech-seminar/assets/72537762/9fd9e488-5b37-443c-a3e1-6706d6414ae8"
+/>
+
+> Map이란 어떤 두 값을 연결한다는 의미에서 붙여진 이름이다.
+
+--------- 5/18일 작성중

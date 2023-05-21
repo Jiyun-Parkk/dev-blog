@@ -1,0 +1,110 @@
+---
+title: Java 문자열 비교하는 방법
+date: '2023-05-21'
+tags: ['java']
+draft: false
+---
+
+Javascript에서는 `===` 이면 무엇이던지 비교가 가능했는데, Java에서는 `==`으로 만능 비교가 불가능하다..ㅎㅎ Java에서는 `==`은 object가 동일한지를 체크하기 때문에 문자열이 동일하다는 것을 보장하지 않는다고 한다. 왜냐하면 `==`로 비교하는 것은 객체의 hashcode만 비교하기 때문이다.
+
+`==`방법이 통하지 않는 다는 것은 백준 `25206 너의 평점은`문제를 풀다가 알게 되었다. 이 문제는 평균 평점을 구하는 문제인데, `P`를 받는 과목은 계산에서 패스해야 했기 때문에 아래와 같이 코드를 짰지만 원하는 결과 값이 나오지 않았다.
+
+```java
+
+if(score != "P") {
+    // ...
+}
+
+// score라는 문자열과 "P" 문자열을 비교할 수 없다
+// 무조건 false 결과값을 내었다.
+```
+
+## equals()으로 비교하기
+
+```java
+String str1 = "a";
+String str2 = "a";
+System.out.println(str1.equals(str2));
+//true
+
+```
+
+equals()는 모든 객체의 부모 클래스인 Object에 정의되어있는 메소드다. equals() 메소드를 살펴보면 같은 객체라면 true를 내뱉고, 만약 객체가 다르고 인자가 String이라면 문자열 자체를 비교하여 동일한지 여부를 리턴해준다.
+
+```java
+// String.java
+public boolean equals(Object anObject) {
+    if (this == anObject) {
+        // 같은 객체라면 true 리턴
+        return true;
+    }
+    if (anObject instanceof String) {
+        // 따른 객체라면 문자열을 서로 비교
+        String anotherString = (String)anObject;
+        int n = value.length;
+        if (n == anotherString.value.length) {
+            char v1[] = value;
+            char v2[] = anotherString.value;
+            int i = 0;
+            while (n-- != 0) {
+                if (v1[i] != v2[i])
+                    return false;
+                i++;
+            }
+            return true;
+        }
+    }
+    return false;
+}
+```
+
+## equals() 사용시 주의점 - NullPointerException
+
+만약 비교 주체가 null이라면 `NullPointerException`이 발생하는데, 비교 대상자가 null이라면 `NullPointerException`는 발생하지 않는다.
+
+```java
+String str1 = null;
+String str2 = "World";
+System.out.println("a.equals(b) : " + str1.equals(str2)); // NullPointerException error 발생
+
+String str1 = "Hello";
+String str2 = null;
+System.out.println("a.equals(b) : " + str1.equals(str2)); // NullPointerException error 발생하지 않음
+```
+
+만약 `NullPointerException`에 대해 무시하고 싶다면, `Object.equals(str1, str2)`를 활용해서 비교해볼 수 있다. `Object.equals()`는 자체적으로 Null에 대한 예외처리를 하지 때문에 해당 에러가 발생하지 않는다. 만약 null값이 비교된다면 에러없이 단순히 false가 리턴된다.
+
+## 대소문자 무시하고 비교하기
+
+Javascript로 할때는 대소문자를 무시하고 하기 위해서 따로 `toUpperCase()`나 `toLowerCase()`를 사용해서 비교했는데 Java에는 `equalsIgnoreCase()`메소드가 있어서 대소문자를 추가로 변환하지 않아도, 알파벳 자체로 비교가 가능하다고 한다.
+
+## compareTo를 이용하여 비교
+
+`compareTo()`는 두개의 문자가 사전적인 순서가 어떻게 되는지 리턴해준다. 리턴 값은 0, 음수, 양수의 int 타입의 값이 리턴된다.
+
+- 0 : 두개의 문자열이 동일
+- 양수: compareTo()를 호출하는 객체가 인자보다 사전적으로 순서가 앞선다
+- 음수: compareTo()를 호출하는 객체가 인자보다 사전적으로 순서가 뒤에다
+
+이 메서드를 활용하면 리스트를 오름차순 혹은 내림차순으로 정렬할 수 있다.
+
+```java
+String str1 = "Hello";
+String str2 = "Hello";
+String str3 = "World";
+
+System.out.println("str1.compareTo(str2) ? " + str1.compareTo(str2));
+System.out.println("str1.compareTo(str3) ? " + str1.compareTo(str3));
+
+System.out.println("str1.compareToIgnoreCase(str2) ? " + str1.compareToIgnoreCase(str2));
+System.out.println("str1.compareToIgnoreCase(str3) ? " + str1.compareToIgnoreCase(str3));
+
+// str1.compareTo(str2) ? 0
+// str1.compareTo(str3) ? -15
+// str1.compareToIgnoreCase(str2) ? 0
+// str1.compareToIgnoreCase(str3) ? -15
+```
+
+만약 대소문자를 무시하고 비교하고 싶다면 `compareToIgnoreCase()`를 활용하면 된다.
+
+[참고: Java 문자열 비교] (https://codechacha.com/ko/java-string-compare/)

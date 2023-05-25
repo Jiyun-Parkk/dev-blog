@@ -1,0 +1,67 @@
+---
+title: Java collection - ArrayList
+date: '2023-05-25'
+tags: ['java']
+draft: false
+---
+
+ArrayList는 컬렉션 프레임워크에서 가장 많이 사용되는 클래스다. ArrayList는 `List`인터페이스를 구현하기 때문에 데이터의 `저장순서가 유지`되고 중복을 허용 한다는 특징을 가진다. ArrayList는 기존의 Vector를 개선한 것으로 Vector와 구현원리와 기능적인 측면에서 동일하지만, Vector는 기존의 소스와의 호환성을 위해 남겨 두는 것이기 때문에 가능하면 ArrayList를 사용하는 것이 좋다.
+
+ArrayList는 Object배열을 이용해서 데이터를 순차적으로 저장한다. ArrayList는 Array와 다르게 저장공간을 미리 정하지 않고, 동적으로 데이터를 넣어줄 수 있다. 따라서 만약에 Object 배열에 더 이상 저장 공간이 없다면 더 큰 공간의 배열을 생성해서 기존 데이터를 복사한 다음 저장한다.
+
+Object는 모든 객체의 최고조상이기 때문에 모든 종류의 객체를 담을 수 있다는 특징이 있다.
+
+ArrayList를 활용한 예제를 확인해보자. 먼저 간단한 ArrayList를 하나 만들었다.
+
+```java
+    ArrayList list1 = new ArrayList(10);
+    list1.add(new Integer(5));
+    list1.add(new Integer(4));
+    list1.add(new Integer(2));
+    list1.add(new Integer(0));
+    list1.add(new Integer(2));
+```
+
+### 원하는 부분만 추출하기
+
+아래처럼 subList를 사용하면 첫번째 인자의 인덱스부터 마지막 인덱스 - 1까지 list를 잘라서 새로운 ArrayList를 만들어 줄 수 있다.
+
+```java
+ArrayList list2 = new ArrayList(list1.subList(1,4));
+```
+
+### 정렬하기
+
+Collections 클래스의 sort 메서드를 사용하면 값 순서대로 정렬이 된다.
+
+```java
+    Collections.sort(list1)
+```
+
+> Collection은 인터페이스, Collections는 클래스!
+
+### 추가하고 변경하기
+
+```java
+    list2.add(3, "A"); // 인덱스가 3인곳에 A를 넣기
+    list2.set(3, "AA"); // 3인곳은 AA로 변경한다
+```
+
+### 포함되어 있는 것은 모두 삭제하기
+
+```java
+ list1.retainAll(list2);
+```
+
+### 반복문으로 삭제하기
+
+```java
+
+    for(int i=list2.size() - 1; i >= 0; i--) {
+      if(list1.contains(list2.get(i))) {
+        list2.remove(i);
+      }
+    }
+```
+
+\_\_\_작성중

@@ -5,7 +5,7 @@ tags: ['java']
 draft: false
 ---
 
-##💡 Wrapper class
+## 💡 Wrapper class
 
 wrapper class는 기본 타입의 데이터를 객체로 취급해야 할 때 사용하는 클래스다. 예를 들어서 배열에서 정렬을 작업을 해야하는 경우, 정렬의 대상인 원소는 객체여야 한다. 왜냐하면 Comparable 인터페이스를 구현한 객체여야 원소 비교 메소드인 `compareTo`를 사용할 수 있기 때문이다.
 
@@ -28,6 +28,7 @@ wrapper class는 기본 타입의 데이터를 객체로 취급해야 할 때 �
 
 쉽게 말하면 기본 타입은 값의 변경이 있을 경우, 값 자체를 변경하지만 래퍼 클래스의 경우에는 객체이기 때문에 만약 변경이 있을 경우 값을 변경하는 것이 아니라 아예 새로운 객체를 생성해서 불변의 속성을 가진다는 의미 이다.
 
+<center>
 <img
   width="500"
   alt="image"
@@ -35,6 +36,7 @@ wrapper class는 기본 타입의 데이터를 객체로 취급해야 할 때 �
 />
 
 <figcaption>출처: tcp school</figcaption>
+</center>
 
 - 기본 타입의 데이터 => 래퍼 클래스의 인스턴스로 변환 : `boxing`
 - 래퍼 클래스의 인스턴스 => 기본 타입으로 꺼냄 : `UnBoxing`
